@@ -1,0 +1,18 @@
+db:
+  postgres:
+    user: "postgres"
+    password: "postgres"
+    db_name: "postgres"
+    host: "localhost"
+    port: "5433"
+    ssl_mode: "disable"
+    max_open_conns: 50
+    max_idle_conns: 15
+    conn_max_idle_time_sec: 30
+
+#upstream_url: "https://go.getblock.io/257b22a46e7948758459ae4aa1009888"
+upstream_url: "https://mainnet.infura.io/v3/726da33cd7d94de49d09c2b69612d199"
+network: "mainnet"
+update_delay: "1m"
+subgraph_path: "./subgraphs"
+request_delay: "3s"
