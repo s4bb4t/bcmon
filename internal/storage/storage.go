@@ -1,29 +1,34 @@
 package storage
 
 import (
-	"fmt"
+	"context"
+	"github.com/jmoiron/sqlx"
+	"github.com/s4bb4t/bcmon/pkg/pgsql/pgconnector"
 	"log/slog"
-	"os"
 )
 
 type storage struct {
+	inputData map[string]struct{}
+
+	db *sqlx.DB
+
 	log *slog.Logger
 }
 
-func NewStorage(log *slog.Logger) *storage {
-	return &storage{log: log}
+func NewStorage(ctx context.Context, connector pgconnector.ConnectionManager, log *slog.Logger) *storage {
+	db, err := connector.GetConnection(ctx, pgconnector.DBReadWrite)
+	if err != nil {
+		panic(err)
+	}
+
+	return &storage{log: log, db: db}
 }
 
 func (s *storage) SaveContract(address string) error {
-	file, err := os.OpenFile("nft_contracts.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return fmt.Errorf("failed to open file: %w", err)
-	}
-	defer file.Close()
+	_, err := s.db.ExecContext(context.Background(), `INSERT INTO public.contract (address) values($1)`, address)
+	return err
+}
 
-	if _, err := file.WriteString(address + "\n"); err != nil {
-		return fmt.Errorf("failed to write to file: %w", err)
-	}
-
-	return nil
+func (s *storage) LoadContracts(src, dest map[string]struct{}) {
+	dest = src
 }

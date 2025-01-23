@@ -16,8 +16,6 @@ func Migrate(connector pgconnector.ConnectionManager) (err error) {
 		return fmt.Errorf("%s: connector error: %w", op, err)
 	}
 
-	goose.SetTableName("bcmon.goose_db_version")
-
 	if err = goose.SetDialect("postgres"); err != nil {
 		return fmt.Errorf("%s: dialect error: %w", op, err)
 	}

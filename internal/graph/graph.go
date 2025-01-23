@@ -1,11 +1,9 @@
 package graph
 
 import (
-	"bufio"
 	"log/slog"
 	"os"
 	"os/exec"
-	"strings"
 )
 
 type Graph struct {
@@ -33,39 +31,13 @@ func (g *Graph) RealExist() map[string]struct{} {
 	return filesMap
 }
 
-func (g *Graph) MustLoadContracts(dict map[string]struct{}) {
+func (g *Graph) Init(contract string) error {
 	if err := os.Mkdir(g.path, 0644); err != nil {
 		if !os.IsExist(err) {
-			panic(err)
+			return err
 		}
 	}
 
-	f, err := os.Open("nft_contracts.txt")
-	if err != nil {
-		if os.IsNotExist(err) {
-			return
-		}
-		panic(err)
-	}
-	defer f.Close()
-
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		addr := strings.TrimSpace(scanner.Text())
-		if addr == "" {
-			continue
-		}
-
-		if _, exists := dict[addr]; !exists {
-			dict[addr] = struct{}{}
-		}
-	}
-	if err := scanner.Err(); err != nil {
-		panic(err)
-	}
-}
-
-func (g *Graph) Init(contract string) error {
 	cmd := exec.Command("graph", "init", contract, contract, "--from-contract", contract, "--network", g.network, "--skip-install", "--skip-git", "--abi", "../abi.json")
 	cmd.Dir = g.path
 	cmd.Stdout = os.Stdout

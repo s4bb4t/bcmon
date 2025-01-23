@@ -42,7 +42,7 @@ func NewProducer(source string, delay time.Duration, log *slog.Logger) *producer
 		panic(err)
 	}
 
-	log.Debug("Debug Enabled")
+	log.Debug("client", slog.String("address", source))
 
 	outCh := make(chan string, 1)
 	receiptCh := make(chan *types.Receipt, 1)
@@ -74,10 +74,10 @@ func (p *producer) Addresses(in chan *types.Block) {
 						}
 
 						p.receiptsCh <- receipt
-						p.log.Debug("Tx's receipt sent")
 						time.Sleep(p.delay)
 					}
 				}
+				p.log.Debug("Transactions receipts sent")
 			}
 		}
 	}()
@@ -115,7 +115,6 @@ func (p *producer) handleReceipts() {
 					}
 				}
 			}
-			p.log.Debug("got address")
 		}
 	}()
 }

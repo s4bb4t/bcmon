@@ -11,7 +11,6 @@ type (
 	}
 
 	Graph interface {
-		MustLoadContracts(dict map[string]struct{})
 		RealExist() map[string]struct{}
 
 		Init(contract string) error
@@ -20,6 +19,7 @@ type (
 	}
 
 	Storage interface {
+		LoadContracts(src, dest map[string]struct{})
 		SaveContract(address string) error
 	}
 )

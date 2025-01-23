@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"github.com/ethereum/go-ethereum/core/types"
 	i "github.com/s4bb4t/bcmon/internal/interfaces"
 	"log/slog"
@@ -27,11 +26,31 @@ type Supervisor struct {
 	log    *slog.Logger
 	ctx    context.Context
 	cancel context.CancelFunc
-	sync.RWMutex
+
+	sync.Mutex
 }
 
-func NewSupervisor(producer i.Producer, storage i.Storage, graph i.Graph, log *slog.Logger, delay time.Duration) *Supervisor {
-	ctx, cancel := context.WithCancel(context.Background())
+// NewSupervisor initializes a new Supervisor instance.
+// It sets up the context, producer, storage, graph, and other necessary components.
+// It also loads existing contracts from storage and prepares channels for communication.
+func NewSupervisor(
+	ctx context.Context,
+	producer i.Producer,
+	storage i.Storage,
+	graph i.Graph,
+	log *slog.Logger,
+	delay time.Duration,
+	inputData []string) *Supervisor {
+	ctx, cancel := context.WithCancel(ctx)
+
+	input := make(map[string]struct{})
+
+	for _, v := range inputData {
+		input[v] = struct{}{}
+	}
+
+	newC := make(map[string]struct{})
+	storage.LoadContracts(input, newC)
 
 	blocksCh := make(chan *types.Block, 1)
 
@@ -41,7 +60,7 @@ func NewSupervisor(producer i.Producer, storage i.Storage, graph i.Graph, log *s
 		graph:    graph,
 
 		usedContracts: make(map[string]struct{}),
-		newContracts:  make(map[string]struct{}),
+		newContracts:  newC,
 
 		blocksCh:    blocksCh,
 		contractsCh: producer.Out(),
@@ -55,13 +74,17 @@ func NewSupervisor(producer i.Producer, storage i.Storage, graph i.Graph, log *s
 	}
 }
 
-// Spin starts main processes.
-// 1. retrieve new contracts loop.
-// 2. save new contracts loop.
-// 3. updater loop.
-// Because Spin have a loops inside, it will lock current goroutine - use .Stop() to stop the app
+// Spin starts the main processes of the Supervisor.
+// It runs three main loops:
+// 1. Retrieves new contracts from the producer.
+// 2. Saves new contracts to storage.
+// 3. Periodically initializes contracts in the graph.
+// This function blocks the current goroutine and should be stopped using the Stop() method.
 func (s *Supervisor) Spin() {
-	s.produceBlocks().takeContracts()
+	s.log.Info("spinFunc: running app")
+
+	s.produce()
+	s.handleErrorsLoop()
 
 	go func() {
 		for {
@@ -69,19 +92,14 @@ func (s *Supervisor) Spin() {
 			case <-s.ctx.Done():
 				return
 			case addr := <-s.contractsCh:
+				s.Lock()
 				if _, exist := s.newContracts[addr]; !exist {
 					if _, exist = s.usedContracts[addr]; !exist {
 						s.newContracts[addr] = struct{}{}
+						s.log.Debug("got new contract to initialize:", slog.String("address", addr))
 					}
 				}
-			}
-		}
-	}()
-
-	go func() {
-		for err := range s.errCh {
-			if err != nil {
-				fmt.Println(err.Error())
+				s.Unlock()
 			}
 		}
 	}()
@@ -103,9 +121,22 @@ func (s *Supervisor) Spin() {
 	}()
 }
 
+func (s *Supervisor) handleErrorsLoop() {
+	go func() {
+		for err := range s.errCh {
+			if err != nil {
+				s.log.Error("app errChan:", err)
+			}
+		}
+	}()
+}
+
+// InitContracts initializes new contracts in the graph and saves them to storage.
+// If `init` is true, it checks if the contract already exists in the graph before initializing.
+// It also marks the contract as "used" after successful initialization.
 func (s *Supervisor) InitContracts(init bool) error {
 	for contract := range s.newContracts {
-		s.log.Debug("Contract to init", slog.Any("new", contract))
+		s.Lock()
 		if init {
 			if _, exist := s.graph.RealExist()[contract]; exist {
 				delete(s.newContracts, contract)
@@ -120,11 +151,9 @@ func (s *Supervisor) InitContracts(init bool) error {
 		if err := s.graph.Init(contract); err != nil {
 			return err
 		}
-
 		if err := s.graph.Create(contract); err != nil {
 			return err
 		}
-
 		if err := s.graph.Deploy(contract); err != nil {
 			return err
 		}
@@ -132,27 +161,21 @@ func (s *Supervisor) InitContracts(init bool) error {
 		s.usedContracts[contract] = struct{}{}
 
 		delete(s.newContracts, contract)
+
+		s.log.Debug("Deployed contract", slog.String("address", contract))
+		s.Unlock()
 	}
 
+	s.log.Info("All new contracts successfully initialized!")
 	return nil
 }
 
-// LoadContracts loads already initialized graph's contracts
-//
-// LoadContracts use Must* function, so it may panic
-func (s *Supervisor) LoadContracts() *Supervisor {
-	s.graph.MustLoadContracts(s.newContracts)
-	return s
-}
-
-func (s *Supervisor) takeContracts() *Supervisor {
+// produce starts the process of fetching blocks from the producer and sending them to the blocks channel.
+// It uses a ticker to periodically fetch blocks and ensures the process stops when the context is canceled.
+func (s *Supervisor) produce() *Supervisor {
 	s.producer.Addresses(s.blocksCh)
 
-	return s
-}
-
-func (s *Supervisor) produceBlocks() *Supervisor {
-	ticker := time.NewTicker(3 * time.Second)
+	ticker := time.NewTicker(s.delay / 2)
 
 	go func() {
 		for {
@@ -174,7 +197,11 @@ func (s *Supervisor) produceBlocks() *Supervisor {
 	return s
 }
 
+// Stop gracefully shuts down the Supervisor.
+// It stops the producer, cancels the context, and closes all communication channels.
 func (s *Supervisor) Stop() {
+	s.log.Info("shutting down the app")
+
 	s.producer.Stop()
 	s.cancel()
 
@@ -183,6 +210,8 @@ func (s *Supervisor) Stop() {
 	close(s.errCh)
 }
 
+// Reload is a placeholder function for reloading or reinitializing the Supervisor.
+// Currently, it does nothing but returns the Supervisor instance.
 func (s *Supervisor) Reload() *Supervisor {
 
 	return s

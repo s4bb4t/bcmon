@@ -13,7 +13,8 @@ import (
 	"log/slog"
 	"os"
 	"os/exec"
-	"time"
+	"os/signal"
+	"syscall"
 )
 
 func init() {
@@ -37,13 +38,16 @@ func init() {
 }
 
 func main() {
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT)
+	defer stop()
+
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 
 	cfg := config.CreateConfig()
 
 	closer := appcloser.InitCloser(nil)
 
-	pgConnector, err := pgconnector.CreateConnection(context.Background(),
+	pgConnector, err := pgconnector.CreateConnection(ctx,
 		cfg.Db.Postgres.GetDsn(),
 		cfg.Db.Postgres.GetMaxOpenConns(),
 		cfg.Db.Postgres.GetIdleConns(),
@@ -57,28 +61,31 @@ func main() {
 		logger.Error("migrator error", slog.Any("err", err))
 	}
 
-	repo := storage.NewStorage(logger)
+	repo := storage.NewStorage(ctx, pgConnector, logger)
 	theGraph := graph.NewGraph(cfg.GetNetwork(), cfg.GetSubgraphPath(), logger)
 	producer := eth.NewProducer(cfg.GetUpstreamURL(), cfg.GetRequestDelay(), logger)
 
 	app := application.NewSupervisor(
+		ctx,
 		producer,
 		repo,
 		theGraph,
 		logger,
-		cfg.GetUpdateDelay())
+		cfg.GetUpdateDelay(),
+		cfg.GetInputData())
 
-	if err := app.LoadContracts().InitContracts(true); err != nil {
+	if err := app.InitContracts(true); err != nil {
 		panic(err)
 	}
 
-	timer := time.NewTimer(30 * time.Second)
+	//timer := time.NewTimer(30 * time.Second)
 
 	go app.Spin()
 
 	select {
-	case <-timer.C:
+	//case <-timer.C:
+	//	app.Stop()
+	case <-ctx.Done():
 		app.Stop()
 	}
-	time.Sleep(10 * time.Second)
 }
