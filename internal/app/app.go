@@ -128,7 +128,7 @@ func (s *Supervisor) handleErrorsLoop() {
 	go func() {
 		for err := range s.errCh {
 			if err != nil {
-				s.log.Error("app errChan:", err)
+				s.log.Error("InitContracts:", slog.Any("error", err))
 			}
 		}
 	}()
@@ -138,10 +138,12 @@ func (s *Supervisor) handleErrorsLoop() {
 // If `init` is true, it checks if the contract already exists in the graph before initializing.
 // It also marks the contract as "used" after successful initialization.
 func (s *Supervisor) InitContracts(init bool) error {
+	realExist := s.graph.RealExist()
+
 	for contract := range s.newContracts {
 		s.Lock()
 		if init {
-			if _, exist := s.graph.RealExist()[contract]; exist {
+			if _, exist := realExist[contract]; exist {
 				delete(s.newContracts, contract)
 				s.Unlock()
 				continue

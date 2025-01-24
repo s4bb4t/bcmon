@@ -24,31 +24,67 @@ type Config struct {
 		InputData []string `json:"input_data"`
 	}
 
-	Debug bool
+	Sepolia Network `mapstructure:"sepolia" json:"sepolia"`
+	Mainnet Network `mapstructure:"mainnet" json:"mainnet"`
 
-	Network     string `mapstructure:"network" json:"network"`
-	UpstreamURL string `mapstructure:"upstream_url" json:"upstream_url"`
-
+	Debug        bool
 	SubgraphPath string `mapstructure:"subgraph_path" json:"subgraph_path"`
+}
+
+type Network struct {
+	Name         string `mapstructure:"name" json:"name"`
+	GraphNodeURL string `mapstructure:"graph_node_url" json:"graph_node_url"`
+	UpstreamURL  string `mapstructure:"upstream_url" json:"upstream_url"`
 
 	RequestDelay time.Duration `mapstructure:"request_delay" json:"request_delay"`
 	UpdateDelay  time.Duration `mapstructure:"update_delay" json:"update_delay"`
 }
 
-func (c *Config) GetInputData() []string {
-	return c.Preload.InputData
+// Network methods
+
+func (c *Network) ValidateNetwork() error {
+	switch {
+	case c.GraphNodeURL == "":
+		return fmt.Errorf("incorrect graph node url")
+	case c.UpstreamURL == "":
+		return fmt.Errorf("incorrect upstream url")
+	case c.Name == "":
+		return fmt.Errorf("incorrect network name")
+	default:
+		return nil
+	}
 }
 
-func (c *Config) GetRequestDelay() time.Duration {
+func (c *Network) GetGraphNodeURL() string {
+	if c.GraphNodeURL == "" {
+		panic("network is not set, please set `mainnet` or `sepolia`")
+	}
+	return c.GraphNodeURL
+}
+
+func (c *Network) GetRequestDelay() time.Duration {
 	return c.RequestDelay
 }
 
-func (c *Config) GetNetwork() string {
-	if c.Network == "" {
-		panic("network is not set, please set `mainnet` or `sepolia`")
+func (c *Network) GetNetwork() string {
+	if c.Name == "" {
+		panic("network name is not set, please set `mainnet` or `sepolia`")
 	}
-	return c.Network
+	return c.Name
 }
+
+func (c *Network) GetUpstreamURL() string {
+	if c.UpstreamURL == "" {
+		panic("UpstreamURL is not set")
+	}
+	return c.UpstreamURL
+}
+
+func (c *Network) GetUpdateDelay() time.Duration {
+	return c.UpdateDelay
+}
+
+// Config methods
 
 func (c *Config) GetSubgraphPath() string {
 	if c.SubgraphPath == "" {
@@ -57,15 +93,8 @@ func (c *Config) GetSubgraphPath() string {
 	return c.SubgraphPath
 }
 
-func (c *Config) GetUpstreamURL() string {
-	if c.UpstreamURL == "" {
-		panic("UpstreamURL is not set")
-	}
-	return c.UpstreamURL
-}
-
-func (c *Config) GetUpdateDelay() time.Duration {
-	return c.UpdateDelay
+func (c *Config) GetInputData() []string {
+	return c.Preload.InputData
 }
 
 func (c *Config) GetIsDebug() bool {

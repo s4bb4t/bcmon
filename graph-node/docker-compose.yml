@@ -23,7 +23,8 @@ services:
       PGDATA: "/var/lib/postgresql/data"
       POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
     volumes:
-      - /opt/graph-node/postgres:/var/lib/postgresql/data:rw
+#      - /opt/graph-node/postgres:/var/lib/postgresql/data:rw
+      - ./data/postgres:/var/lib/postgresql/data:rw
 
   graph-node:
     image: graphprotocol/graph-node
@@ -56,4 +57,5 @@ services:
       - "8080:8080"
     volumes:
       #- /opt/ipfs_data:/data/ipfs:rw
-      - /opt/graph-node/ipfs:/data/ipfs:rw
+#      - /opt/graph-node/ipfs:/data/ipfs:rw
+      - ./data/ipfs:/data/ipfs

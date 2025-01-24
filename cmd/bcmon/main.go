@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"sync"
 	"syscall"
 )
 
@@ -61,31 +62,70 @@ func main() {
 		logger.Error("migrator error", slog.Any("err", err))
 	}
 
-	repo := storage.NewStorage(ctx, pgConnector, logger)
-	theGraph := graph.NewGraph(cfg.GetNetwork(), cfg.GetSubgraphPath(), logger)
-	producer := eth.NewProducer(cfg.GetUpstreamURL(), cfg.GetRequestDelay(), logger)
+	var wg sync.WaitGroup
+	go func() {
+		if err := cfg.Sepolia.ValidateNetwork(); err != nil {
+			logger.Error("Sepolia", slog.Any("error", err))
+			return
+		}
+		wg.Add(1)
 
-	app := application.NewSupervisor(
-		ctx,
-		producer,
-		repo,
-		theGraph,
-		logger,
-		cfg.GetUpdateDelay(),
-		cfg.GetInputData())
+		repo := storage.NewStorage(ctx, pgConnector, logger)
+		theGraph := graph.NewGraph(cfg.Sepolia.GetNetwork(), cfg.GetSubgraphPath(), cfg.Sepolia.GetGraphNodeURL(), logger)
+		producer := eth.NewProducer(cfg.Sepolia.GetUpstreamURL(), cfg.Sepolia.GetRequestDelay(), logger)
 
-	if err := app.InitContracts(true); err != nil {
-		panic(err)
-	}
+		app := application.NewSupervisor(
+			ctx,
+			producer,
+			repo,
+			theGraph,
+			logger,
+			cfg.Sepolia.GetUpdateDelay(),
+			cfg.GetInputData())
 
-	//timer := time.NewTimer(30 * time.Second)
+		if err := app.InitContracts(true); err != nil {
+			panic(err)
+		}
 
-	go app.Spin()
+		go app.Spin()
+		select {
+		case <-ctx.Done():
+			app.Stop()
+			wg.Done()
+		}
+	}()
 
-	select {
-	//case <-timer.C:
-	//	app.Stop()
-	case <-ctx.Done():
-		app.Stop()
-	}
+	go func() {
+		if err := cfg.Mainnet.ValidateNetwork(); err != nil {
+			logger.Error("Mainnet", slog.Any("error", err))
+			return
+		}
+		wg.Add(1)
+
+		repo := storage.NewStorage(ctx, pgConnector, logger)
+		theGraph := graph.NewGraph(cfg.Mainnet.GetNetwork(), cfg.GetSubgraphPath(), cfg.Mainnet.GetGraphNodeURL(), logger)
+		producer := eth.NewProducer(cfg.Mainnet.GetUpstreamURL(), cfg.Mainnet.GetRequestDelay(), logger)
+
+		app := application.NewSupervisor(
+			ctx,
+			producer,
+			repo,
+			theGraph,
+			logger,
+			cfg.Mainnet.GetUpdateDelay(),
+			cfg.GetInputData())
+
+		if err := app.InitContracts(true); err != nil {
+			panic(err)
+		}
+
+		go app.Spin()
+		select {
+		case <-ctx.Done():
+			app.Stop()
+			wg.Done()
+		}
+	}()
+
+	wg.Wait()
 }

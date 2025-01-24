@@ -9,16 +9,17 @@ import (
 type Graph struct {
 	path    string
 	network string
+	nodeURL string
 
 	log *slog.Logger
 }
 
-func NewGraph(network, path string, log *slog.Logger) *Graph {
-	return &Graph{log: log, network: network, path: path}
+func NewGraph(network, path, node string, log *slog.Logger) *Graph {
+	return &Graph{log: log, network: network, path: path, nodeURL: node}
 }
 
 func (g *Graph) RealExist() map[string]struct{} {
-	files, err := os.ReadDir(g.path)
+	files, err := os.ReadDir(g.path + "/" + g.network)
 	if err != nil {
 		return nil
 	}
@@ -47,7 +48,7 @@ func (g *Graph) Init(contract string) error {
 }
 
 func (g *Graph) Create(contract string) error {
-	cmd := exec.Command("graph", "create", contract, "--node", "http://localhost:8020/")
+	cmd := exec.Command("graph", "create", g.network+"/"+contract, "--node", g.nodeURL)
 	cmd.Dir = g.path + "/" + g.network + "/" + contract
 
 	cmd.Stdout = os.Stdout
@@ -57,7 +58,7 @@ func (g *Graph) Create(contract string) error {
 }
 
 func (g *Graph) Deploy(contract string) error {
-	cmd := exec.Command("graph", "deploy", contract, "--node", "http://localhost:8020/", "--version-label", "v0.0.1")
+	cmd := exec.Command("graph", "deploy", g.network+"/"+contract, "--node", g.nodeURL, "--version-label", "v0.0.1")
 	cmd.Dir = g.path + "/" + g.network + "/" + contract
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

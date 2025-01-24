@@ -10,6 +10,8 @@ db:
     max_idle_conns: 15
     conn_max_idle_time_sec: 30
 
+graph_node_url: "http://localhost:8020" # USE ONLY ADMIN PORT
+
 #upstream_url: "https://go.getblock.io/257b22a46e7948758459ae4aa1009888" # mainnet
 #upstream_url: "https://mainnet.infura.io/v3/726da33cd7d94de49d09c2b69612d199" # mainnet
 #network: "mainnet"
@@ -19,3 +21,4 @@ network: "sepolia"
 subgraph_path: "./subgraphs"
 update_delay: "1m"
 request_delay: "500ms"
+
