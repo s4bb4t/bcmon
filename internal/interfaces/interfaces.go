@@ -1,6 +1,9 @@
 package interfaces
 
-import "github.com/ethereum/go-ethereum/core/types"
+import (
+	"context"
+	"github.com/ethereum/go-ethereum/core/types"
+)
 
 type (
 	Producer interface {
@@ -19,7 +22,8 @@ type (
 	}
 
 	Storage interface {
-		LoadContracts(src, dest map[string]struct{})
-		SaveContract(address string) error
+		LoadContracts(ctx context.Context, src, dest map[string]struct{})
+		SaveContract(ctx context.Context, address string) error
+		Initialized(ctx context.Context, dest map[string]struct{})
 	}
 )

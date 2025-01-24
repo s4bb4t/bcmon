@@ -1,0 +1,25 @@
+[deployment]
+[[deployment.rule]]
+indexers = [ "default" ]
+
+
+[store]
+[store.primary]
+connection = "postgresql://graph-node:let-me-in@graph-postgres/graph-node"
+weight = 1
+pool_size = 5
+
+[chains]
+ingestor = "block_ingestor_node"
+
+[chains.sepolia]
+shard = "primary"
+provider = [ { label = "sepolia", url = "https://sepolia-eth.dev.web3gate.ru:32443/d95d6f7f-bd5b-4145-8c5f-6506cf44b5d4", features = [] } ]
+
+# [chains.amoy]
+# shard = "primary"
+# provider = [ { label = "amoy", url = "https://go.getblock.io/f9550a92c04647a8bbde2f8bfbc23fcd", features = [] } ]
+
+# [chains.testnet]
+# shard = "primary"
+# provider = [ { label = "testnet", url = "https://go.getblock.io/5c740d860e6b4f41a9fb7058a17f88b4", features = [] } ]%

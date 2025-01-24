@@ -1,42 +1,18 @@
-version: "3"
+version: '3.8'
 services:
-  graph-node:
-    image: graphprotocol/graph-node
-    ports:
-      - "8000:8000"
-      - "8001:8001"
-      - "8020:8020"
-      - "8030:8030"
-      - "8040:8040"
-    depends_on:
-      - ipfs
-      - postgres
-    extra_hosts:
-      - host.docker.internal:host-gateway
-    environment:
-      postgres_host: postgres
-      postgres_user: graph-node
-      postgres_pass: let-me-in
-      postgres_db: graph-node
-      ipfs: "ipfs:5001"
-      ethereum: "sepolia:https://sepolia-eth.dev.web3gate.ru:32443/d95d6f7f-bd5b-4145-8c5f-6506cf44b5d4"
-      GRAPH_LOG: info
-  ipfs:
-    image: ipfs/kubo:v0.17.0
-    ports:
-      - "5001:5001"
-    volumes:
-      - ./data/ipfs:/data/ipfs
+
   postgres:
-    image: postgres:14
+    image: postgres
+    container_name: graph-postgres
     ports:
-      - "5432:5432"
+      - '5432:5432'
     command:
       [
         "postgres",
         "-cshared_preload_libraries=pg_stat_statements",
-        "-cmax_connections=200",
+        "-cmax_connections=200"
       ]
+    stop_grace_period: 1m
     environment:
       POSTGRES_USER: graph-node
       POSTGRES_PASSWORD: let-me-in
@@ -47,4 +23,37 @@ services:
       PGDATA: "/var/lib/postgresql/data"
       POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
     volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+      - /opt/graph-node/postgres:/var/lib/postgresql/data:rw
+
+  graph-node:
+    image: graphprotocol/graph-node
+    container_name: graph-node
+    stop_grace_period: 1m
+    ports:
+      - '8000:8000'
+      - '8001:8001'
+      - '8020:8020'
+      - '8030:8030'
+      - '8040:8040'
+    depends_on:
+      - ipfs
+      - postgres
+      #extra_hosts:
+      #- host.docker.internal:host-gatewaoy
+    volumes:
+      - ./config.toml:/app/config.toml
+    environment:
+      ipfs: "http://ipfs:5001"
+      GRAPH_NODE_CONFIG: /app/config.toml
+      GRAPH_LOG: info
+
+  ipfs:
+    image: ipfs/kubo:release
+    container_name: ipfs
+    ports:
+      - "4001:4001"
+      - "5001:5001"
+      - "8080:8080"
+    volumes:
+      #- /opt/ipfs_data:/data/ipfs:rw
+      - /opt/graph-node/ipfs:/data/ipfs:rw

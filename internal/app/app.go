@@ -45,12 +45,15 @@ func NewSupervisor(
 
 	input := make(map[string]struct{})
 
-	for _, v := range inputData {
-		input[v] = struct{}{}
-	}
-
 	newC := make(map[string]struct{})
-	storage.LoadContracts(input, newC)
+	if len(inputData) != 0 {
+		for _, v := range inputData {
+			input[v] = struct{}{}
+		}
+		storage.LoadContracts(ctx, input, newC)
+	} else {
+		storage.Initialized(ctx, newC)
+	}
 
 	blocksCh := make(chan *types.Block, 1)
 
@@ -140,10 +143,11 @@ func (s *Supervisor) InitContracts(init bool) error {
 		if init {
 			if _, exist := s.graph.RealExist()[contract]; exist {
 				delete(s.newContracts, contract)
+				s.Unlock()
 				continue
 			}
 		} else {
-			if err := s.storage.SaveContract(contract); err != nil {
+			if err := s.storage.SaveContract(s.ctx, contract); err != nil {
 				return err
 			}
 		}
