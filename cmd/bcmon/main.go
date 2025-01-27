@@ -2,14 +2,14 @@ package main
 
 import (
 	"context"
-	application "github.com/s4bb4t/bcmon/internal/app"
-	"github.com/s4bb4t/bcmon/internal/config"
-	"github.com/s4bb4t/bcmon/internal/eth"
-	"github.com/s4bb4t/bcmon/internal/graph"
-	"github.com/s4bb4t/bcmon/internal/storage"
-	appcloser "github.com/s4bb4t/bcmon/pkg/app_closer"
-	"github.com/s4bb4t/bcmon/pkg/pgsql/migrator"
-	"github.com/s4bb4t/bcmon/pkg/pgsql/pgconnector"
+	application "git.web3gate.ru/web3/nft/GraphForge/internal/app"
+	"git.web3gate.ru/web3/nft/GraphForge/internal/config"
+	"git.web3gate.ru/web3/nft/GraphForge/internal/eth"
+	"git.web3gate.ru/web3/nft/GraphForge/internal/graph"
+	"git.web3gate.ru/web3/nft/GraphForge/internal/storage"
+	appcloser "git.web3gate.ru/web3/nft/GraphForge/pkg/app_closer"
+	"git.web3gate.ru/web3/nft/GraphForge/pkg/pgsql/migrator"
+	"git.web3gate.ru/web3/nft/GraphForge/pkg/pgsql/pgconnector"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -63,12 +63,13 @@ func main() {
 	}
 
 	var wg sync.WaitGroup
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		if err := cfg.Sepolia.ValidateNetwork(); err != nil {
 			logger.Error("Sepolia", slog.Any("error", err))
 			return
 		}
-		wg.Add(1)
 
 		repo := storage.NewStorage(ctx, pgConnector, logger)
 		theGraph := graph.NewGraph(cfg.Sepolia.GetNetwork(), cfg.GetSubgraphPath(), cfg.Sepolia.GetGraphNodeURL(), logger)
@@ -91,16 +92,16 @@ func main() {
 		select {
 		case <-ctx.Done():
 			app.Stop()
-			wg.Done()
 		}
 	}()
 
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		if err := cfg.Mainnet.ValidateNetwork(); err != nil {
 			logger.Error("Mainnet", slog.Any("error", err))
 			return
 		}
-		wg.Add(1)
 
 		repo := storage.NewStorage(ctx, pgConnector, logger)
 		theGraph := graph.NewGraph(cfg.Mainnet.GetNetwork(), cfg.GetSubgraphPath(), cfg.Mainnet.GetGraphNodeURL(), logger)

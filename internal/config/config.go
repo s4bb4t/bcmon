@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"git.web3gate.ru/web3/nft/GraphForge/internal/vault"
 	"github.com/spf13/viper"
 	"os"
 	"strings"
@@ -113,6 +114,7 @@ func CreateConfig() *Config {
 	}
 
 	var cfg Config
+	debug := false
 	var err error
 	var data []byte
 
@@ -128,6 +130,7 @@ func CreateConfig() *Config {
 	}
 
 	if stage == stageLocal {
+		debug = true
 		v.AddConfigPath("../../.")
 		v.SetConfigName("config")
 		v.SetConfigType("yaml")
@@ -144,6 +147,37 @@ func CreateConfig() *Config {
 
 		return &cfg
 	}
+
+	if stage == stageProd {
+		err := os.Setenv("LOG_LEVEL", "prod")
+		if err != nil {
+			panic("cannot set LOG_LEVEL env")
+		}
+		debug = false
+	}
+
+	secretId := viper.GetString("VAULT_SECRET_ID")
+	roleId := viper.GetString("VAULT_ROLE_ID")
+	vaultAddress := viper.GetString("VAULT_ADDRESS")
+	vaultSecretPAth := viper.GetString("VAULT_SECRET_PATH")
+
+	vault := vault.NewClient(vaultAddress, secretId, roleId, time.Second*5)
+
+	secrets, err := vault.GetSecrets(vaultSecretPAth)
+	if err != nil {
+		panic(fmt.Errorf("cannot get vault secrets", err))
+	}
+
+	cfgBytes, err := json.Marshal(secrets)
+	if err != nil {
+		panic("cannot read config")
+	}
+	err = json.Unmarshal(cfgBytes, &cfg)
+	if err != nil {
+		panic(fmt.Errorf("cannot unmarshal config. %w", err))
+	}
+
+	cfg.Debug = debug
 
 	return &cfg
 }

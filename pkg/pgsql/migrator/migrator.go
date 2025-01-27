@@ -3,7 +3,7 @@ package migrator
 import (
 	"context"
 	"fmt"
-	"github.com/s4bb4t/bcmon/pkg/pgsql/pgconnector"
+	"git.web3gate.ru/web3/nft/GraphForge/pkg/pgsql/pgconnector"
 
 	"github.com/pressly/goose"
 )

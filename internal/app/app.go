@@ -2,8 +2,8 @@ package app
 
 import (
 	"context"
+	i "git.web3gate.ru/web3/nft/GraphForge/internal/interfaces"
 	"github.com/ethereum/go-ethereum/core/types"
-	i "github.com/s4bb4t/bcmon/internal/interfaces"
 	"log/slog"
 	"sync"
 	"time"
