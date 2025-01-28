@@ -3,7 +3,7 @@ FROM node:alpine3.20
 WORKDIR /
 
 COPY bin/app /
-COPY config.yaml /
+COPY config.yml /
 COPY migrations/ /migrations/
 COPY node_modules/ node_modules/
 COPY package.json /
