@@ -1,0 +1,100 @@
+variables:
+  K8S_DEV_API_URL: https://10.255.13.3:6443
+  DOCKER_IMAGE: $DOCKER_REGISTRY_FQN/web3/blog-api/image
+
+stages:
+  - build
+  - image_build
+  - deploy_dev
+  - deploy_prod
+
+build:
+  stage: build
+  image: git.web3gate.ru:5000/golang:1.23
+  before_script:
+    - ls -la
+    - date
+  script:
+    - cat $NETRC > ~/.netrc
+    - export STAGE=dev
+    - go mod tidy
+    - GIT_TERMINAL_PROMPT=1 GOPROXY=$GOPROXY GOPRIVATE="git.web3gate.ru" CGO_ENABLED=0 GOOS=linux make build
+  artifacts:
+    paths:
+      - bin/
+    expire_in: 1 day
+  after_script:
+    - date
+  rules:
+    - when: always
+
+image_build:
+  stage: image_build
+  image: git.web3gate.ru:5000/docker:24.0.6-git 
+  variables:
+    IMAGE_TAG: $CI_COMMIT_REF_SLUG.$CI_PIPELINE_ID
+  rules:
+    - if: $CI_COMMIT_TAG
+      variables:
+        IMAGE_TAG: $CI_COMMIT_TAG
+    - when: always
+  script:
+    - echo "$DOCKER_REGISTRY_PASS" | docker login -u $DOCKER_REGISTRY_LOGIN --password-stdin $DOCKER_REGISTRY_FQN
+    - docker build -t $DOCKER_IMAGE:$IMAGE_TAG .
+    - docker push $DOCKER_IMAGE:$IMAGE_TAG
+
+deploy_dev:
+  stage: deploy_dev
+  image: git.web3gate.ru:5000/dtzar/helm-kubectl:3.13
+  script:
+    - kubectl config set-cluster k8s --insecure-skip-tls-verify=true --server=$K8S_DEV_API_URL
+    - kubectl config set-credentials ci --token=$K8S_DEV_CI_TOKEN
+    - kubectl config set-context ci --cluster=k8s --user=ci
+    - kubectl config use-context ci
+    - kubectl get po -n web3-dev
+    - helm upgrade --install nft-graph-forge-dev ./helm
+      --set app.tag=$CI_COMMIT_REF_SLUG.$CI_PIPELINE_ID
+      --set env.VAULT_SECRET_PATH=$VAULT_SECRET_PATH
+      --set env.VAULT_SECRET_ID=$VAULT_SECRET_ID
+      --set env.VAULT_ROLE_ID=$VAULT_ROLE_ID      
+      --set env.VAULT_ADDRESS=$VAULT_ADDRESS
+      --set env.TOKEN=$TOKEN
+      --set env.STAGE=dev
+      --debug
+      --atomic
+      --timeout 120s
+      --values ./helm/values.yaml
+      --namespace web3-dev    
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "main"'    
+      when: always
+    - when: never
+
+# deploy_prod:
+#   stage: deploy_prod
+#   image: git.web3gate.ru:5000/dtzar/helm-kubectl:3.13
+#   script:
+#     - kubectl config get-contexts
+#     - kubectl config use-context web3/infra:prod-agent
+#     - kubectl get pods -n web3
+#     - helm upgrade --install blog ./helm
+#       --set app.tag=$CI_COMMIT_TAG
+#       --set env.VAULT_SECRET_ID=$PROD_VAULT_SECRET_ID
+#       --set env.VAULT_ROLE_ID=$PROD_VAULT_ROLE_ID
+#       --set env.VAULT_SECRET_PATH=$PROD_VAULT_SECRET_PATH
+#       --set env.VAULT_ADDRESS=$PROD_VAULT_ADDRESS
+#       --set env.STAGE=prod
+#       --debug
+#       --atomic
+#       --timeout 120s
+#       --values ./helm/values-prod.yaml
+#       --namespace web3
+#   variables:
+#     KUBE_CONTEXT: web3/infra:prod-agent
+#     DEPLOY_ENV: prod
+#     NAMESPACE: web3
+#     VALUES_FILE: ./helm/values-prod.yaml
+#   rules:
+#     - if: $CI_COMMIT_TAG
+#       when: manual
+#     - when: never
