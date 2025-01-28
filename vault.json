@@ -1,0 +1,23 @@
+{
+    "db": {
+      "postgres": {
+        "user": "graph-node",
+        "password": "let-me-in",
+        "db_name": "graph-node",
+        "host": "localhost",        
+        "port": "5432",
+        "ssl_mode": "disable",
+        "max_open_conns": 50,    
+        "max_idle_conns": 15,
+        "conn_max_idle_time_sec": 30   
+      }
+    },
+    "subgraph_path": "./subgraphs",
+    "sepolia":{
+        "upstream_url": "https://sepolia-eth.dev.web3gate.ru:32443/d95d6f7f-bd5b-4145-8c5f-6506cf44b5d4",
+        "name": "sepolia",
+        "graph_node_url": "http://localhost:8020",
+        "update_delay": "1m",
+        "request_delay": "500ms"  
+    }
+}
