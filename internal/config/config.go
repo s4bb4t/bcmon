@@ -174,7 +174,7 @@ func CreateConfig() *Config {
 	}
 	err = json.Unmarshal(cfgBytes, &cfg)
 	if err != nil {
-		panic(fmt.Errorf("cannot unmarshal config. %w", err))
+		panic(fmt.Errorf("cannot unmarshal config: %w", err))
 	}
 
 	cfg.Debug = debug

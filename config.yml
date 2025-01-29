@@ -19,6 +19,8 @@ sepolia:
   update_delay: "1m"
   request_delay: "500ms"
 
+
+
 #graph_node_url: "http://localhost:8020" # USE ONLY ADMIN PORT
 #
 ##upstream_url: "https://go.getblock.io/257b22a46e7948758459ae4aa1009888" # mainnet
