@@ -1,0 +1,134 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: "{{ .Release.Name }}"
+  labels:
+    k8s-app: "{{ .Release.Name }}"
+    project: {{ .Values.app.project }}
+  namespace: {{ .Values.k8s.namespace }}
+spec:
+  replicas: {{ .Values.replicas | default 1 }}
+  selector:
+    matchLabels:
+      k8s-app: "{{ .Release.Name }}"
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        date: "{{ now | unixEpoch }}"
+        k8s-app: "{{ .Release.Name }}"
+    spec:
+      terminationGracePeriodSeconds: 30
+      restartPolicy: Always 
+      imagePullSecrets:
+      - name: regcred
+      containers:
+      - name: "{{ .Release.Name }}"
+        image: "{{ .Values.app.repository }}/{{ .Values.app.project }}/{{ .Values.app.app }}/image:{{ .Values.app.tag }}"
+        imagePullPolicy: Always
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+{{- if .Values.ingress }}
+        ports:
+          {{- if eq .Values.ingress.http.enabled true }}
+          - containerPort: {{ .Values.ingress.http.port }}
+          {{- end }} 
+          {{- if eq .Values.metrics.http.enabled true }}
+          - containerPort: {{ .Values.metrics.http.port }}
+          {{- end }} 
+{{- end }}
+        env:
+          - name: VAULT_SECRET_ID
+            value: {{ .Values.env.VAULT_SECRET_ID }}
+          - name: VAULT_ROLE_ID
+            value: {{ .Values.env.VAULT_ROLE_ID }}
+          - name: VAULT_ADDRESS
+            value: {{ .Values.env.VAULT_ADDRESS }}
+          - name: VAULT_SECRET_PATH
+            value: {{ .Values.env.VAULT_SECRET_PATH }}
+          - name: STAGE
+            value: {{ .Values.env.STAGE }}
+          - name: TOKEN
+            value: {{ .Values.env.TOKEN }}            
+          - name: MY_NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: MY_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: MY_POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: MY_POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: MY_POD_SERVICE_ACCOUNT
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.serviceAccountName  
+
+---
+{{- if .Values.ingress }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Release.Name }}"
+  namespace: {{ .Values.k8s.namespace }}
+  labels:
+    k8s-app: "{{ .Release.Name }}"
+    project: {{ .Values.app.project }}
+spec:
+  ports:
+  {{- if eq .Values.ingress.http.enabled true }}  
+  - protocol: TCP
+    name: "tcp-{{ .Values.ingress.http.port }}"
+    port: {{ .Values.ingress.http.port }}
+    targetPort: {{ .Values.ingress.http.port }}
+  {{- end }} 
+  {{- if eq .Values.metrics.http.enabled true }}  
+  - protocol: TCP
+    name: "tcp-{{ .Values.metrics.http.port }}"
+    port: {{ .Values.metrics.http.port }}
+    targetPort: {{ .Values.metrics.http.port }}
+  {{- end }} 
+  selector:
+    k8s-app: "{{ .Release.Name }}"
+{{- end }}
+
+---
+{{- if .Values.ingress }}
+{{- if eq .Values.ingress.http.enabled true }}
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: "{{ .Release.Name }}"
+  namespace: {{ .Values.k8s.namespace }}
+  labels:
+    project: {{ .Values.app.project }}
+spec:
+  ingressClassName: {{ .Values.ingress.class.name }}
+  rules:
+    - host: {{ .Values.ingress.http.host }}
+      port: 8090 
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: "{{ .Release.Name }}"
+                port:
+                  number: {{ .Values.ingress.http.port }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.http.host }}
+      secretName: {{ .Values.ingress.http.secret }}
+
+{{- end }}
+{{- end }}
+

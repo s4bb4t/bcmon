@@ -1,0 +1,43 @@
+app:
+  project: web3 
+  app: nft-graph-forge 
+  repository: git.web3gate.ru:5000
+  tag: latest
+
+replicas: 1
+
+k8s:
+  namespace: web3
+
+resources:       
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+ingress:  
+  class:
+    name: nginx-infra
+  http:
+    host: nft-graph-forge.web3gate.ru
+    secret: web3
+    enabled: true
+    port: 8090
+
+metrics:
+  http:
+    port: 2112
+    enabled: true
+
+hpa:
+  minReplicas: 1
+  maxReplicas: 5
+      
+env:
+  VAULT_SECRET_ID: ""
+  VAULT_ROLE_ID: ""
+  VAULT_ADDRESS: ""
+  VAULT_SECRET_PATH: ""
+  STAGE: ""

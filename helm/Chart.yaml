@@ -1,0 +1,4 @@
+apiVersion: v2
+version: v3
+name: nft-graph-forge 
+type: application
