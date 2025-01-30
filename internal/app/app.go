@@ -126,9 +126,14 @@ func (s *Supervisor) Spin() {
 
 func (s *Supervisor) handleErrorsLoop() {
 	go func() {
-		for err := range s.errCh {
-			if err != nil {
-				s.log.Error("InitContracts:", slog.Any("error", err))
+		for {
+			select {
+			case <-s.ctx.Done():
+				return
+			case err := <-s.errCh:
+				if err != nil {
+					s.log.Error("InitContracts:", slog.Any("error", err))
+				}
 			}
 		}
 	}()
@@ -155,12 +160,15 @@ func (s *Supervisor) InitContracts(init bool) error {
 
 		if err := s.graph.Init(contract); err != nil {
 			s.errCh <- err
+			continue
 		}
 		if err := s.graph.Create(contract); err != nil {
 			s.errCh <- err
+			continue
 		}
 		if err := s.graph.Deploy(contract); err != nil {
 			s.errCh <- err
+			continue
 		}
 
 		s.usedContracts[contract] = struct{}{}
