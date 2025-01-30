@@ -67,7 +67,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		logger := logger.With(slog.String("at network", "sepolia"))
+		logger := logger.With(slog.String("network", "sepolia"))
 
 		if err := cfg.Sepolia.ValidateNetwork(); err != nil {
 			logger.Warn("Sepolia", slog.Any("error", err), slog.String("msg", "ignore it if you don't need sepolia forge"))
@@ -101,7 +101,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		logger := logger.With(slog.String("at network", "mainnet"))
+		logger := logger.With(slog.String("network", "mainnet"))
 
 		if err := cfg.Mainnet.ValidateNetwork(); err != nil {
 			logger.Warn("Mainnet", slog.Any("error", err), slog.String("msg", "ignore it if you don't need mainnet forge"))
