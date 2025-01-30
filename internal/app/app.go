@@ -67,7 +67,7 @@ func NewSupervisor(
 
 		blocksCh:    blocksCh,
 		contractsCh: producer.Out(),
-		errCh:       make(chan error),
+		errCh:       make(chan error, 1),
 
 		delay: delay,
 
@@ -86,8 +86,8 @@ func NewSupervisor(
 func (s *Supervisor) Spin() {
 	s.log.Info("spinFunc: running app")
 
-	s.produce()
 	s.handleErrorsLoop()
+	s.produce()
 
 	go func() {
 		for {
@@ -142,26 +142,25 @@ func (s *Supervisor) InitContracts(init bool) error {
 
 	for contract := range s.newContracts {
 		s.Lock()
-		if init {
-			if _, exist := realExist[contract]; exist {
-				delete(s.newContracts, contract)
-				s.Unlock()
-				continue
-			}
-		} else {
+
+		if _, exist := realExist[contract]; exist {
+			delete(s.newContracts, contract)
+		}
+
+		if !init {
 			if err := s.storage.SaveContract(s.ctx, contract); err != nil {
 				return err
 			}
 		}
 
 		if err := s.graph.Init(contract); err != nil {
-			return err
+			s.errCh <- err
 		}
 		if err := s.graph.Create(contract); err != nil {
-			return err
+			s.errCh <- err
 		}
 		if err := s.graph.Deploy(contract); err != nil {
-			return err
+			s.errCh <- err
 		}
 
 		s.usedContracts[contract] = struct{}{}
