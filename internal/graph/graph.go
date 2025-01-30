@@ -45,6 +45,7 @@ func (g *Graph) Init(contract string) error {
 	cmd.Stdout = io.Discard
 	cmd.Stderr = os.Stderr
 
+	g.log.Debug("graph-init")
 	return cmd.Run()
 }
 
@@ -55,6 +56,7 @@ func (g *Graph) Create(contract string) error {
 	cmd.Stdout = io.Discard
 	cmd.Stderr = os.Stderr
 
+	g.log.Debug("graph-create")
 	return cmd.Run()
 }
 
@@ -64,5 +66,6 @@ func (g *Graph) Deploy(contract string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
+	g.log.Debug("graph-deploy")
 	return cmd.Run()
 }
