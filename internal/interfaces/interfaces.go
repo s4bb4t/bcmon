@@ -8,7 +8,7 @@ import (
 type (
 	Producer interface {
 		Addresses(chan *types.Block)
-		Block() *types.Block
+		Block() (*types.Block, error)
 		Out() chan string
 		Stop()
 	}

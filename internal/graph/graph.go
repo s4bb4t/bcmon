@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"io"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -41,7 +42,7 @@ func (g *Graph) Init(contract string) error {
 
 	cmd := exec.Command("graph", "init", g.network+"/"+contract, g.network+"/"+contract, "--from-contract", contract, "--network", g.network, "--skip-install", "--skip-git", "--abi", "../abi.json")
 	cmd.Dir = g.path
-	cmd.Stdout = os.Stdout
+	cmd.Stdout = io.Discard
 	cmd.Stderr = os.Stderr
 
 	return cmd.Run()
@@ -51,7 +52,7 @@ func (g *Graph) Create(contract string) error {
 	cmd := exec.Command("graph", "create", g.network+"/"+contract, "--node", g.nodeURL)
 	cmd.Dir = g.path + "/" + g.network + "/" + contract
 
-	cmd.Stdout = os.Stdout
+	cmd.Stdout = io.Discard
 	cmd.Stderr = os.Stderr
 
 	return cmd.Run()

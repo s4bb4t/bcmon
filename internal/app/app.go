@@ -189,7 +189,10 @@ func (s *Supervisor) produce() *Supervisor {
 			case <-s.ctx.Done():
 				return
 			case <-ticker.C:
-				block := s.producer.Block()
+				block, err := s.producer.Block()
+				if err != nil || block == nil {
+					s.errCh <- err
+				}
 
 				select {
 				case <-s.ctx.Done():

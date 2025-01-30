@@ -83,15 +83,16 @@ func (p *producer) Addresses(in chan *types.Block) {
 	}()
 }
 
-func (p *producer) Block() *types.Block {
+func (p *producer) Block() (*types.Block, error) {
 	block, err := p.client.BlockByNumber(context.Background(), nil)
 	if err != nil {
 		p.log.Debug("Failed to get latest block:", err)
+		return nil, err
 	}
 
 	p.log.Debug("Got new block")
 
-	return block
+	return block, nil
 }
 
 func (p *producer) handleReceipts() {

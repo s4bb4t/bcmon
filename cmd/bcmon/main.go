@@ -10,6 +10,7 @@ import (
 	appcloser "git.web3gate.ru/web3/nft/GraphForge/pkg/app_closer"
 	"git.web3gate.ru/web3/nft/GraphForge/pkg/pgsql/migrator"
 	"git.web3gate.ru/web3/nft/GraphForge/pkg/pgsql/pgconnector"
+	"io"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -21,7 +22,7 @@ import (
 func init() {
 	cmd := exec.Command("npm", "install", "@graphprotocol/graph-cli")
 	cmd.Dir = "./"
-	cmd.Stdout = os.Stdout
+	cmd.Stdout = io.Discard
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
@@ -30,7 +31,7 @@ func init() {
 
 	cmd = exec.Command("npm", "install", "@graphprotocol/graph-ts")
 	cmd.Dir = "./"
-	cmd.Stdout = os.Stdout
+	cmd.Stdout = io.Discard
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
@@ -66,8 +67,10 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		logger := logger.With(slog.String("at network", "sepolia"))
+
 		if err := cfg.Sepolia.ValidateNetwork(); err != nil {
-			logger.Error("Sepolia", slog.Any("error", err))
+			logger.Warn("Sepolia", slog.Any("error", err), slog.String("msg", "ignore it if you don't need sepolia forge"))
 			return
 		}
 
@@ -98,8 +101,10 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
+		logger := logger.With(slog.String("at network", "mainnet"))
+
 		if err := cfg.Mainnet.ValidateNetwork(); err != nil {
-			logger.Error("Mainnet", slog.Any("error", err))
+			logger.Warn("Mainnet", slog.Any("error", err), slog.String("msg", "ignore it if you don't need mainnet forge"))
 			return
 		}
 
@@ -116,9 +121,9 @@ func main() {
 			cfg.Mainnet.GetUpdateDelay(),
 			cfg.GetInputData())
 
-		if err := app.InitContracts(true); err != nil {
-			panic(err)
-		}
+		//if err := app.InitContracts(true); err != nil {
+		//	panic(err)
+		//}
 
 		go app.Spin()
 		select {
