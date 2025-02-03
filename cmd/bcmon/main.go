@@ -87,9 +87,9 @@ func main() {
 			cfg.Sepolia.GetUpdateDelay(),
 			cfg.GetInputData())
 
-		if err := app.InitContracts(true); err != nil {
-			panic(err)
-		}
+		//if err := app.InitContracts(true); err != nil {
+		//	panic(err)
+		//}
 
 		go app.Spin()
 		select {
