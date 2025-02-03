@@ -20,6 +20,10 @@ ingestor = "block_ingestor_node"
 shard = "primary"
 provider = [ { label = "sepolia", url = "https://b.dev.web3gate.ru:32443/d95d6f7f-bd5b-4145-8c5f-6506cf44b5d4", features = [] } ]
 
+[chains.holesky]
+shard = "primary"
+provider = [ { label = "holesky", url = "https://b.dev.web3gate.ru:32443/722dd4b7-d6b2-4f40-93a6-ca9988ebcb80", features = [] } ]
+
 # [chains.amoy]
 # shard = "primary"
 # provider = [ { label = "amoy", url = "https://go.getblock.io/f9550a92c04647a8bbde2f8bfbc23fcd", features = [] } ]
