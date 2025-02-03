@@ -26,7 +26,7 @@ type Config struct {
 	}
 
 	Sepolia Network `mapstructure:"sepolia" json:"sepolia"`
-	Mainnet Network `mapstructure:"mainnet" json:"mainnet"`
+	Holesky Network `mapstructure:"holesky" json:"holesky"`
 
 	Debug        bool
 	SubgraphPath string `mapstructure:"subgraph_path" json:"subgraph_path"`

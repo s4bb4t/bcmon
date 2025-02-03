@@ -101,16 +101,16 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		logger := logger.With(slog.String("network", "mainnet"))
+		logger := logger.With(slog.String("network", "holesky"))
 
-		if err := cfg.Mainnet.ValidateNetwork(); err != nil {
-			logger.Warn("Mainnet", slog.Any("error", err), slog.String("msg", "ignore it if you don't need mainnet forge"))
+		if err := cfg.Holesky.ValidateNetwork(); err != nil {
+			logger.Warn("Holesky", slog.Any("error", err), slog.String("msg", "ignore it if you don't need mainnet forge"))
 			return
 		}
 
 		repo := storage.NewStorage(ctx, pgConnector, logger)
-		theGraph := graph.NewGraph(cfg.Mainnet.GetNetwork(), cfg.GetSubgraphPath(), cfg.Mainnet.GetGraphNodeURL(), logger)
-		producer := eth.NewProducer(cfg.Mainnet.GetUpstreamURL(), cfg.Mainnet.GetRequestDelay(), logger)
+		theGraph := graph.NewGraph(cfg.Holesky.GetNetwork(), cfg.GetSubgraphPath(), cfg.Holesky.GetGraphNodeURL(), logger)
+		producer := eth.NewProducer(cfg.Holesky.GetUpstreamURL(), cfg.Holesky.GetRequestDelay(), logger)
 
 		app := application.NewSupervisor(
 			ctx,
@@ -118,7 +118,7 @@ func main() {
 			repo,
 			theGraph,
 			logger,
-			cfg.Mainnet.GetUpdateDelay(),
+			cfg.Holesky.GetUpdateDelay(),
 			cfg.GetInputData())
 
 		//if err := app.InitContracts(true); err != nil {
