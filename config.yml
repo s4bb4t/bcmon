@@ -13,17 +13,16 @@ db:
 subgraph_path: "./subgraphs"
 
 sepolia:
-  upstream_url: "https://sepolia-eth.dev.web3gate.ru:32443/d95d6f7f-bd5b-4145-8c5f-6506cf44b5d4" # sepolia
+  upstream_url: "https://b.dev.web3gate.ru:32443/d95d6f7f-bd5b-4145-8c5f-6506cf44b5d4" # sepolia
   name: "sepolia"
   graph_node_url: "http://localhost:8020" # USE ONLY ADMIN PORT
   update_delay: "1m"
   request_delay: "500ms"
 
 #mainnet:
-#upstream_url: "https://go.getblock.io/257b22a46e7948758459ae4aa1009888" # mainnet
-#upstream_url: "https://mainnet.infura.io/v3/726da33cd7d94de49d09c2b69612d199" # mainnet
 #  upstream_url: "https://go.getblock.io/257b22a46e7948758459ae4aa1009888" # mainnet
 #  name: "sepolia"
 #  graph_node_url: "http://localhost:8020" # USE ONLY ADMIN PORT
 #  update_delay: "1m"
 #  request_delay: "3s"
+#upstream_url: "https://mainnet.infura.io/v3/726da33cd7d94de49d09c2b69612d199" # mainnet

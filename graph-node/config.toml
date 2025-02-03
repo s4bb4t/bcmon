@@ -12,13 +12,13 @@ pool_size = 5
 [chains]
 ingestor = "block_ingestor_node"
 
-[chains.mainnet]
-shard = "primary"
-provider = [ { label = "mainnet", url = "https://go.getblock.io/257b22a46e7948758459ae4aa1009888", features = [] } ]
+# [chains.mainnet]
+# shard = "primary"
+# provider = [ { label = "mainnet", url = "https://go.getblock.io/257b22a46e7948758459ae4aa1009888", features = [] } ]
 
 [chains.sepolia]
 shard = "primary"
-provider = [ { label = "sepolia", url = "https://sepolia-eth.dev.web3gate.ru:32443/d95d6f7f-bd5b-4145-8c5f-6506cf44b5d4", features = [] } ]
+provider = [ { label = "sepolia", url = "https://b.dev.web3gate.ru:32443/d95d6f7f-bd5b-4145-8c5f-6506cf44b5d4", features = [] } ]
 
 # [chains.amoy]
 # shard = "primary"
