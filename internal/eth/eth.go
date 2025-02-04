@@ -2,9 +2,13 @@ package eth
 
 import (
 	"context"
+	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"log/slog"
+	"strings"
 	"time"
 )
 
@@ -106,10 +110,13 @@ func (p *producer) handleReceipts() {
 					if len(logEntry.Topics) < 1 {
 						continue
 					}
+
 					switch logEntry.Topics[0].Hex() {
 					case transfer:
-						contractAddress := logEntry.Address.Hex()
-						p.outCh <- contractAddress
+						if p.isERC721(logEntry.Address) {
+							contractAddress := logEntry.Address.Hex()
+							p.outCh <- contractAddress
+						}
 					case transferSingle, transferBatch:
 						contractAddress := logEntry.Address.Hex()
 						p.outCh <- contractAddress
@@ -118,6 +125,43 @@ func (p *producer) handleReceipts() {
 			}
 		}
 	}()
+}
+
+func (p *producer) isERC721(contractAddress common.Address) bool {
+	interfaceID := [4]byte{0x80, 0xac, 0x58, 0xcd}
+	result, err := p.callSupportsInterface(contractAddress, interfaceID)
+	if err != nil {
+		return false
+	}
+	return result
+}
+
+func (p *producer) callSupportsInterface(contractAddress common.Address, interfaceID [4]byte) (bool, error) {
+	abi, err := abi.JSON(strings.NewReader(`[{"constant":true,"inputs":[{"name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"}]`))
+	if err != nil {
+		return false, err
+	}
+
+	data, err := abi.Pack("supportsInterface", interfaceID)
+	if err != nil {
+		return false, err
+	}
+
+	msg := ethereum.CallMsg{
+		To:   &contractAddress,
+		Data: data,
+	}
+	result, err := p.client.CallContract(context.Background(), msg, nil)
+	if err != nil {
+		return false, err
+	}
+
+	var supported bool
+	if err := abi.UnpackIntoInterface(&supported, "supportsInterface", result); err != nil {
+		return false, err
+	}
+
+	return supported, nil
 }
 
 func (p *producer) Out() chan string {

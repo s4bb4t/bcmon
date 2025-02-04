@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	i "git.web3gate.ru/web3/nft/GraphForge/internal/interfaces"
 	"github.com/ethereum/go-ethereum/core/types"
 	"log/slog"
@@ -200,7 +201,10 @@ func (s *Supervisor) produce() *Supervisor {
 				return
 			case <-ticker.C:
 				block, err := s.producer.Block()
-				if err != nil || block == nil {
+				if block == nil {
+					s.errCh <- fmt.Errorf("block is nil")
+				}
+				if err != nil {
 					s.errCh <- err
 				}
 
