@@ -4,7 +4,7 @@ import (
 	"context"
 	"git.web3gate.ru/web3/nft/GraphForge/pkg/pgsql/pgconnector"
 	"github.com/jmoiron/sqlx"
-	"log/slog"
+	"go.uber.org/zap"
 )
 
 type storage struct {
@@ -12,10 +12,10 @@ type storage struct {
 
 	db *sqlx.DB
 
-	log *slog.Logger
+	log *zap.Logger
 }
 
-func NewStorage(ctx context.Context, connector pgconnector.ConnectionManager, log *slog.Logger) *storage {
+func NewStorage(ctx context.Context, connector pgconnector.ConnectionManager, log *zap.Logger) *storage {
 	db, err := connector.GetConnection(ctx, pgconnector.DBReadWrite)
 	if err != nil {
 		panic(err)
@@ -24,17 +24,13 @@ func NewStorage(ctx context.Context, connector pgconnector.ConnectionManager, lo
 	return &storage{log: log, db: db}
 }
 
-func (s *storage) SaveContract(ctx context.Context, address string) error {
-	_, err := s.db.ExecContext(context.Background(), `INSERT INTO public.contract (address) values($1)`, address)
+func (s *storage) SaveContract(ctx context.Context, address, network string) error {
+	_, err := s.db.ExecContext(context.Background(), `INSERT INTO public.contract (address, network) values($1, $2)`, address, network)
 	return err
 }
 
-func (s *storage) LoadContracts(ctx context.Context, src, dest map[string]struct{}) {
-	dest = src
-}
-
-func (s *storage) Initialized(ctx context.Context, dest map[string]struct{}) {
-	rows, err := s.db.QueryContext(ctx, `select * from public.contract`)
+func (s *storage) Initialized(ctx context.Context, network string, dest map[string]struct{}) {
+	rows, err := s.db.QueryContext(ctx, `select address from public.contract where network = $1`, network)
 	if err != nil {
 		panic(err)
 	}

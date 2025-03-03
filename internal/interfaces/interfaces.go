@@ -15,15 +15,13 @@ type (
 
 	Graph interface {
 		RealExist() map[string]struct{}
-
 		Init(contract string) error
 		Create(contract string) error
 		Deploy(contract string) error
 	}
 
 	Storage interface {
-		LoadContracts(ctx context.Context, src, dest map[string]struct{})
-		SaveContract(ctx context.Context, address string) error
-		Initialized(ctx context.Context, dest map[string]struct{})
+		SaveContract(ctx context.Context, address, network string) error
+		Initialized(ctx context.Context, network string, dest map[string]struct{})
 	}
 )

@@ -7,7 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"log/slog"
+	"go.uber.org/zap"
 	"strings"
 	"time"
 )
@@ -28,7 +28,7 @@ const (
 )
 
 type producer struct {
-	log    *slog.Logger
+	log    *zap.Logger
 	client *ethclient.Client
 
 	receiptsCh chan *types.Receipt
@@ -40,19 +40,18 @@ type producer struct {
 	cancel context.CancelFunc
 }
 
-func NewProducer(source string, delay time.Duration, log *slog.Logger) *producer {
+func NewProducer(source string, delay time.Duration, log *zap.Logger, contracts chan string) *producer {
 	client, err := ethclient.Dial(source)
 	if err != nil {
 		panic(err)
 	}
 
-	log.Debug("client", slog.String("address", source))
+	log.Debug("client", zap.String("address", source))
 
-	outCh := make(chan string, 1)
 	receiptCh := make(chan *types.Receipt, 1)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	producer := producer{client: client, receiptsCh: receiptCh, outCh: outCh, ctx: ctx, cancel: cancel, log: log, delay: delay}
+	producer := producer{client: client, receiptsCh: receiptCh, outCh: contracts, ctx: ctx, cancel: cancel, log: log, delay: delay}
 
 	producer.handleReceipts()
 
@@ -66,6 +65,11 @@ func (p *producer) Addresses(in chan *types.Block) {
 			case <-p.ctx.Done():
 				return
 			case block := <-in:
+				if block == nil {
+					p.log.Error("some problems with upstream node")
+					return
+				}
+
 				for _, tx := range block.Transactions() {
 					select {
 					case <-p.ctx.Done():
@@ -73,7 +77,7 @@ func (p *producer) Addresses(in chan *types.Block) {
 					default:
 						receipt, err := p.client.TransactionReceipt(context.Background(), tx.Hash())
 						if err != nil {
-							p.log.Debug("Failed to get transaction receipt:", err)
+							p.log.Debug("Failed to get transaction receipt:", zap.Error(err))
 							continue
 						}
 
@@ -90,7 +94,7 @@ func (p *producer) Addresses(in chan *types.Block) {
 func (p *producer) Block() (*types.Block, error) {
 	block, err := p.client.BlockByNumber(context.Background(), nil)
 	if err != nil {
-		p.log.Debug("Failed to get latest block:", err)
+		p.log.Debug("Failed to get latest block:", zap.Error(err))
 		return nil, err
 	}
 
@@ -137,12 +141,12 @@ func (p *producer) isERC721(contractAddress common.Address) bool {
 }
 
 func (p *producer) callSupportsInterface(contractAddress common.Address, interfaceID [4]byte) (bool, error) {
-	abi, err := abi.JSON(strings.NewReader(`[{"constant":true,"inputs":[{"name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"}]`))
+	Abi, err := abi.JSON(strings.NewReader(`[{"constant":true,"inputs":[{"name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"}]`))
 	if err != nil {
 		return false, err
 	}
 
-	data, err := abi.Pack("supportsInterface", interfaceID)
+	data, err := Abi.Pack("supportsInterface", interfaceID)
 	if err != nil {
 		return false, err
 	}
@@ -157,7 +161,7 @@ func (p *producer) callSupportsInterface(contractAddress common.Address, interfa
 	}
 
 	var supported bool
-	if err := abi.UnpackIntoInterface(&supported, "supportsInterface", result); err != nil {
+	if err := Abi.UnpackIntoInterface(&supported, "supportsInterface", result); err != nil {
 		return false, err
 	}
 

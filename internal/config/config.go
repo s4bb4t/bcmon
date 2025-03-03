@@ -25,38 +25,26 @@ type Config struct {
 		InputData []string `json:"input_data"`
 	}
 
-	Sepolia Network `mapstructure:"sepolia" json:"sepolia"`
-	Holesky Network `mapstructure:"holesky" json:"holesky"`
+	Networks []Network `mapstructure:"networks" json:"networks"`
 
 	Debug        bool
-	SubgraphPath string `mapstructure:"subgraph_path" json:"subgraph_path"`
+	GraphPath    string `mapstructure:"subgraph_path" json:"subgraph_path"`
+	GraphNodeURL string `mapstructure:"graph_node_url" json:"graph_node_url"`
 }
 
 type Network struct {
-	Name         string `mapstructure:"name" json:"name"`
-	GraphNodeURL string `mapstructure:"graph_node_url" json:"graph_node_url"`
-	UpstreamURL  string `mapstructure:"upstream_url" json:"upstream_url"`
+	Name        string `mapstructure:"name" json:"name"`
+	UpstreamURL string `mapstructure:"upstream_url" json:"upstream_url"`
 
 	RequestDelay time.Duration `mapstructure:"request_delay" json:"request_delay"`
 	UpdateDelay  time.Duration `mapstructure:"update_delay" json:"update_delay"`
 }
 
-// Network methods
-
-func (c *Network) ValidateNetwork() error {
-	switch {
-	case c.GraphNodeURL == "":
-		return fmt.Errorf("incorrect graph node url")
-	case c.UpstreamURL == "":
-		return fmt.Errorf("incorrect upstream url")
-	case c.Name == "":
-		return fmt.Errorf("incorrect network name")
-	default:
-		return nil
-	}
+func (c *Config) UpstreamURL(net string) string {
+	return net
 }
 
-func (c *Network) GetGraphNodeURL() string {
+func (c *Config) GetGraphNodeURL() string {
 	if c.GraphNodeURL == "" {
 		panic("network is not set, please set `mainnet` or `sepolia`")
 	}
@@ -67,39 +55,11 @@ func (c *Network) GetRequestDelay() time.Duration {
 	return c.RequestDelay
 }
 
-func (c *Network) GetNetwork() string {
-	if c.Name == "" {
-		panic("network name is not set, please set `mainnet` or `sepolia`")
-	}
-	return c.Name
-}
-
-func (c *Network) GetUpstreamURL() string {
-	if c.UpstreamURL == "" {
-		panic("UpstreamURL is not set")
-	}
-	return c.UpstreamURL
-}
-
-func (c *Network) GetUpdateDelay() time.Duration {
-	return c.UpdateDelay
-}
-
-// Config methods
-
 func (c *Config) GetSubgraphPath() string {
-	if c.SubgraphPath == "" {
+	if c.GraphPath == "" {
 		panic("SubgraphPath is not set")
 	}
-	return c.SubgraphPath
-}
-
-func (c *Config) GetInputData() []string {
-	return c.Preload.InputData
-}
-
-func (c *Config) GetIsDebug() bool {
-	return c.Debug
+	return c.GraphPath
 }
 
 func CreateConfig() *Config {
@@ -165,7 +125,7 @@ func CreateConfig() *Config {
 
 	secrets, err := vault.GetSecrets(vaultSecretPAth)
 	if err != nil {
-		panic(fmt.Errorf("cannot get vault secrets", err))
+		panic(fmt.Errorf("cannot get vault secrets : %w", err))
 	}
 
 	cfgBytes, err := json.Marshal(secrets)

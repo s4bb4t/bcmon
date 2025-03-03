@@ -1,0 +1,2019 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "apidocs",
+    "version": "0.0.0"
+  },
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http"
+  ],
+  "host": "localhost:8082",
+  "tags": [
+    {
+      "name": "Auth"
+    },
+    {
+      "name": "SubgraphService"
+    }
+  ],
+  "definitions": {
+    "protoCheckFreeTariffIsUsedRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoCheckFreeTariffIsUsedResponse": {
+      "type": "object",
+      "properties": {
+        "isUsed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "protoCreateFreeProjectRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoCreateGPTTokenRequest": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        }
+      }
+    },
+    "protoCreateIPFSTokenRequest": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        }
+      }
+    },
+    "protoCreateNFTTokenRequest": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        }
+      }
+    },
+    "protoCreateProjectRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "protoCreateTokenRequest": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "networkId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoCreateUserRequest": {
+      "type": "object",
+      "properties": {
+        "passwordHash": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "protoCreateUserResponse": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoDeleteProjectRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoDeleteTokenRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "tokenId": {
+          "type": "string"
+        }
+      }
+    },
+    "protoGPTToken": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "apiKey": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "rps": {
+          "type": "string",
+          "format": "int64"
+        },
+        "remainingRequests": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoGetGPTTokensRequest": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "limit": {
+          "type": "string",
+          "format": "int64"
+        },
+        "offset": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoGetGPTTokensResponse": {
+      "type": "object",
+      "properties": {
+        "tokens": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoGPTToken"
+          }
+        },
+        "totalCount": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoGetIPFSTokensRequest": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "limit": {
+          "type": "string",
+          "format": "int64"
+        },
+        "offset": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoGetIPFSTokensResponse": {
+      "type": "object",
+      "properties": {
+        "storage": {
+          "$ref": "#/definitions/protoIPFSStorage"
+        },
+        "tokens": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoIPFSToken"
+          }
+        },
+        "totalCount": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoGetNFTTokensRequest": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "limit": {
+          "type": "string",
+          "format": "int64"
+        },
+        "offset": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoGetNFTTokensResponse": {
+      "type": "object",
+      "properties": {
+        "tokens": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoNFTToken"
+          }
+        },
+        "totalCount": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoGetNetworkGroupsResponse": {
+      "type": "object",
+      "properties": {
+        "networks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoNetworkGroup"
+          }
+        }
+      }
+    },
+    "protoGetProjectAvailableTariffsRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoGetProjectAvailableTariffsResponse": {
+      "type": "object",
+      "properties": {
+        "tariffs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoTariff"
+          }
+        }
+      }
+    },
+    "protoGetProjectRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoGetProjectTariffLimitsOracleResponse": {
+      "type": "object",
+      "properties": {
+        "rulesCount": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoGetProjectsRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "limit": {
+          "type": "string",
+          "format": "int64"
+        },
+        "offset": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoGetProjectsResponse": {
+      "type": "object",
+      "properties": {
+        "projects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoProject"
+          }
+        },
+        "totalCount": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoGetTariffRequest": {
+      "type": "object",
+      "properties": {
+        "tariffId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoGetTariffsResponse": {
+      "type": "object",
+      "properties": {
+        "tariffs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoTariff"
+          }
+        }
+      }
+    },
+    "protoGetTokensRequest": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "limit": {
+          "type": "string",
+          "format": "int64"
+        },
+        "offset": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoGetTokensResponse": {
+      "type": "object",
+      "properties": {
+        "tokens": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoToken"
+          }
+        },
+        "totalCount": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoGetUserByIdRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoGetUserByIdResponse": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "protoGetUserIdRequest": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "protoGetUserWithPassHashResponse": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "passwordHash": {
+          "type": "string"
+        }
+      }
+    },
+    "protoIPFSStorage": {
+      "type": "object",
+      "properties": {
+        "storageRemain": {
+          "type": "string",
+          "format": "int64"
+        },
+        "storageLimit": {
+          "type": "string",
+          "format": "int64"
+        },
+        "transferRemains": {
+          "type": "string",
+          "format": "int64"
+        },
+        "transferLimit": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoIPFSToken": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "apiKey": {
+          "type": "string"
+        },
+        "privateKey": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "basePath": {
+          "type": "string"
+        }
+      }
+    },
+    "protoNFTToken": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "apiKey": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "rps": {
+          "type": "string",
+          "format": "int64"
+        },
+        "remainingRequests": {
+          "type": "string",
+          "format": "int64"
+        },
+        "basePath": {
+          "type": "string"
+        }
+      }
+    },
+    "protoNetworkGroup": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "protocol": {
+          "type": "string"
+        },
+        "network": {
+          "type": "string"
+        },
+        "basePath": {
+          "type": "string"
+        }
+      }
+    },
+    "protoProject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "tariff": {
+          "$ref": "#/definitions/protoProjectTariff"
+        }
+      }
+    },
+    "protoProjectTariff": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "tariffId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "validFrom": {
+          "type": "string"
+        },
+        "validTo": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "cost": {
+          "type": "number",
+          "format": "double"
+        },
+        "tariffKv": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoTariffKv"
+          }
+        }
+      }
+    },
+    "protoSetTariffRequest": {
+      "type": "object",
+      "properties": {
+        "tariffId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protoTariff": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "cost": {
+          "type": "number",
+          "format": "double"
+        },
+        "duration": {
+          "type": "string",
+          "format": "int64"
+        },
+        "tariffKv": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoTariffKv"
+          }
+        }
+      }
+    },
+    "protoTariffKv": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "tariffId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "val": {
+          "type": "string",
+          "format": "int64"
+        },
+        "key": {
+          "type": "string"
+        }
+      }
+    },
+    "protoToken": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "networkId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "network": {
+          "type": "string"
+        },
+        "protocol": {
+          "type": "string"
+        },
+        "apiKey": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "basePath": {
+          "type": "string"
+        }
+      }
+    },
+    "protoUpdateProjectRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "projectId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "protoCreateSubgraphBatchRequest": {
+      "type": "object",
+      "example": {
+        "subgraphs": [
+          {
+            "protocol": "Ethereum",
+            "network": "Mainnet",
+            "contractAddress": "0x1234567890abcdef"
+          },
+          {
+            "protocol": "Ethereum",
+            "network": "Rinkeby",
+            "contractAddress": "0xabcdef1234567890"
+          }
+        ]
+      },
+      "properties": {
+        "subgraphs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protoSubgraphInfo"
+          },
+          "description": "\u0421\u043f\u0438\u0441\u043e\u043a \u0441\u0430\u0431\u0433\u0440\u0430\u0444\u043e\u0432 \u0434\u043b\u044f \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u044f"
+        }
+      },
+      "title": "CreateSubgraphBatchRequest",
+      "required": [
+        "subgraphs"
+      ]
+    },
+    "protoCreateSubgraphBatchResponse": {
+      "type": "object",
+      "example": {
+        "subgraphIds": [
+          "batch-subgraph-id-1",
+          "batch-subgraph-id-2"
+        ]
+      },
+      "properties": {
+        "subgraphIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "\u0421\u043f\u0438\u0441\u043e\u043a ID \u0441\u043e\u0437\u0434\u0430\u043d\u043d\u044b\u0445 \u0441\u0430\u0431\u0433\u0440\u0430\u0444\u043e\u0432"
+        }
+      },
+      "title": "CreateSubgraphBatchResponse",
+      "required": [
+        "subgraphIds"
+      ]
+    },
+    "protoCreateSubgraphRequest": {
+      "type": "object",
+      "example": {
+        "protocol": "Ethereum",
+        "network": "Mainnet",
+        "contractAddress": "0x1234567890abcdef"
+      },
+      "properties": {
+        "protocol": {
+          "type": "string",
+          "description": "\u041f\u0440\u043e\u0442\u043e\u043a\u043e\u043b (\u043d\u0430\u043f\u0440\u0438\u043c\u0435\u0440, Ethereum)"
+        },
+        "network": {
+          "type": "string",
+          "description": "\u0421\u0435\u0442\u044c (\u043d\u0430\u043f\u0440\u0438\u043c\u0435\u0440, Mainnet, Rinkeby)"
+        },
+        "contractAddress": {
+          "type": "string",
+          "description": "\u0410\u0434\u0440\u0435\u0441 \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442\u0430"
+        }
+      },
+      "title": "CreateSubgraphRequest",
+      "required": [
+        "protocol",
+        "network",
+        "contractAddress"
+      ]
+    },
+    "protoCreateSubgraphResponse": {
+      "type": "object",
+      "example": {
+        "subgraphId": "generated-subgraph-id"
+      },
+      "properties": {
+        "subgraphId": {
+          "type": "string",
+          "description": "ID \u0441\u043e\u0437\u0434\u0430\u043d\u043d\u043e\u0433\u043e \u0441\u0430\u0431\u0433\u0440\u0430\u0444\u0430"
+        }
+      },
+      "title": "CreateSubgraphResponse",
+      "required": [
+        "subgraphId"
+      ]
+    },
+    "protoDeleteSubgraphRequest": {
+      "type": "object",
+      "example": {
+        "protocol": "Ethereum",
+        "network": "Mainnet",
+        "contractAddress": "0x1234567890abcdef"
+      },
+      "properties": {
+        "protocol": {
+          "type": "string",
+          "description": "\u041f\u0440\u043e\u0442\u043e\u043a\u043e\u043b (\u043d\u0430\u043f\u0440\u0438\u043c\u0435\u0440, Ethereum)"
+        },
+        "network": {
+          "type": "string",
+          "description": "\u0421\u0435\u0442\u044c (\u043d\u0430\u043f\u0440\u0438\u043c\u0435\u0440, Mainnet, Rinkeby)"
+        },
+        "contractAddress": {
+          "type": "string",
+          "description": "\u0410\u0434\u0440\u0435\u0441 \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442\u0430"
+        }
+      },
+      "title": "DeleteSubgraphRequest",
+      "required": [
+        "protocol",
+        "network",
+        "contractAddress"
+      ]
+    },
+    "protoSubgraphInfo": {
+      "type": "object",
+      "example": {
+        "protocol": "Ethereum",
+        "network": "Mainnet",
+        "contractAddress": "0x1234567890abcdef"
+      },
+      "properties": {
+        "protocol": {
+          "type": "string",
+          "description": "\u041f\u0440\u043e\u0442\u043e\u043a\u043e\u043b (\u043d\u0430\u043f\u0440\u0438\u043c\u0435\u0440, Ethereum)"
+        },
+        "network": {
+          "type": "string",
+          "description": "\u0421\u0435\u0442\u044c (\u043d\u0430\u043f\u0440\u0438\u043c\u0435\u0440, Mainnet, Rinkeby)"
+        },
+        "contractAddress": {
+          "type": "string",
+          "description": "\u0410\u0434\u0440\u0435\u0441 \u043a\u043e\u043d\u0442\u0440\u0430\u043a\u0442\u0430"
+        }
+      },
+      "title": "SubgraphInfo",
+      "required": [
+        "protocol",
+        "network",
+        "contractAddress"
+      ]
+    }
+  },
+  "paths": {
+    "/auth/check_free_tariff_is_used": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f \u0442\u0430\u0440\u0438\u0444\u0430",
+        "operationId": "Auth_CheckFreeTariffIsUsed",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoCheckFreeTariffIsUsedResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoCheckFreeTariffIsUsedRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/create_fee_project": {
+      "post": {
+        "description": "\u0414\u043b\u044f c\u043e\u0437\u0434\u0430\u043d\u0438\u044f \u043f\u0440\u043e\u0435\u043a\u0442\u043e\u0432 \u0441 \u0431\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u044b\u043c \u0442\u0430\u0440\u0438\u0444\u043e\u043c",
+        "operationId": "Auth_CreateFreeProject",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoProject"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoCreateFreeProjectRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/create_gpt_token": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u044f gpt \u0442\u043e\u043a\u0435\u043d\u0430",
+        "operationId": "Auth_CreateGPTToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGPTToken"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoCreateGPTTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/create_ipfs_token": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u044f ipfs \u0442\u043e\u043a\u0435\u043d\u0430",
+        "operationId": "Auth_CreateIPFSToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoIPFSToken"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoCreateIPFSTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/create_nft_token": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u044f NFT \u0442\u043e\u043a\u0435\u043d\u0430",
+        "operationId": "Auth_CreateNFTToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoNFTToken"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoCreateNFTTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/create_projects": {
+      "post": {
+        "description": "\u0414\u043b\u044f c\u043e\u0437\u0434\u0430\u043d\u0438\u044f \u043f\u0440\u043e\u0435\u043a\u0442\u043e\u0432",
+        "operationId": "Auth_CreateProject",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoProject"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoCreateProjectRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/create_token": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u044f \u0442\u043e\u043a\u0435\u043d\u0430",
+        "operationId": "Auth_CreateToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoToken"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoCreateTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/create_user": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u0441\u043e\u0437\u0434\u0430\u043d\u0438\u044f \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f",
+        "operationId": "Auth_CreateUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoCreateUserResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoCreateUserRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/delete_gpt_token": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u0443\u0434\u0430\u043b\u0435\u043d\u0438\u044f gpt \u0442\u043e\u043a\u0435\u043d\u0430",
+        "operationId": "Auth_DeleteGPTToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoDeleteTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/delete_ipfs_token": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u0443\u0434\u0430\u043b\u0435\u043d\u0438\u044f ipfs \u0442\u043e\u043a\u0435\u043d\u0430",
+        "operationId": "Auth_DeleteIPFSToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoDeleteTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/delete_nft_token": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u0443\u0434\u0430\u043b\u0435\u043d\u0438\u044f NFT \u0442\u043e\u043a\u0435\u043d\u0430",
+        "operationId": "Auth_DeleteNFTToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoDeleteTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/delete_project": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u0443\u0434\u0430\u043b\u0435\u043d\u0438\u044f \u043f\u0440\u043e\u0435\u043a\u0442\u0430",
+        "operationId": "Auth_DeleteProject",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoDeleteProjectRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/delete_token": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u0443\u0434\u0430\u043b\u0435\u043d\u0438\u044f \u0442\u043e\u043a\u0435\u043d\u0430",
+        "operationId": "Auth_DeleteToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoDeleteTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/get_gpt_tokens": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f gpt \u0442\u043e\u043a\u0435\u043d\u043e\u0432",
+        "operationId": "Auth_GetGPTTokens",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetGPTTokensResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoGetGPTTokensRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/get_ipfs_tokens": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f ipfs \u0442\u043e\u043a\u0435\u043d\u043e\u0432",
+        "operationId": "Auth_GetIPFSTokens",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetIPFSTokensResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoGetIPFSTokensRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/get_network_groups": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f c\u043f\u0438\u0441\u043a\u0430 \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u043c\u044b\u0445 \u0441\u0435\u0442\u0435\u0439",
+        "operationId": "Auth_GetNetworkGroups",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetNetworkGroupsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/get_nft_tokens": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f NFT \u0442\u043e\u043a\u0435\u043d\u043e\u0432",
+        "operationId": "Auth_GetNFTTokens",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetNFTTokensResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoGetNFTTokensRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/get_oracle_network_groups": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f c\u043f\u0438\u0441\u043a\u0430 \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u043c\u044b\u0445 \u0441\u0435\u0442\u0435\u0439 \u0434\u043b\u044f oracle",
+        "operationId": "Auth_GetOracleNetworkGroups",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetNetworkGroupsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/get_project": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f \u043f\u0440\u043e\u0435\u043a\u0442\u0430",
+        "operationId": "Auth_GetProject",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoProject"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoGetProjectRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/get_project_available_tariffs": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f \u0442\u0430\u0440\u0438\u0444\u0430",
+        "operationId": "Auth_GetProjectAvailableTariffs",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetProjectAvailableTariffsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoGetProjectAvailableTariffsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/get_projects": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f \u043c\u0430\u0441\u0441\u0438\u0432\u0430 \u043f\u0440\u043e\u0435\u043a\u0442\u043e\u0432",
+        "operationId": "Auth_GetProjects",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetProjectsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoGetProjectsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/get_slef_hostedt_network_groups": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f c\u043f\u0438\u0441\u043a\u0430 \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u043c\u044b\u0445 \u0441\u0435\u0442\u0435\u0439 \u043a\u043e\u0442\u043e\u0440\u044b\u0435 \u0445\u043e\u0441\u0442\u044f\u0442\u0441\u044f \u0443 \u043d\u0430\u0441",
+        "operationId": "Auth_GetSelfHostedNetworkGroups",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetNetworkGroupsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/get_tokens": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f \u0442\u043e\u043a\u0435\u043d\u043e\u0432",
+        "operationId": "Auth_GetTokens",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetTokensResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoGetTokensRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/get_user": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f",
+        "operationId": "Auth_GetUserId",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetUserWithPassHashResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoGetUserIdRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/get_user_by_id": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f",
+        "operationId": "Auth_GetUserById",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetUserByIdResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoGetUserByIdRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/set-tariff": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u043a\u0438 \u0442\u0430\u0440\u0438\u0444\u0430",
+        "operationId": "Auth_SetTariff",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoSetTariffRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/tariff": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f \u0442\u0430\u0440\u0438\u0444\u0430",
+        "operationId": "Auth_GetTariff",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoTariff"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoGetTariffRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/tariffs": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f \u0441\u043f\u0438\u0441\u043a\u0430 \u0432\u0441\u0435\u0445 \u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0445 \u0442\u0430\u0440\u0438\u0444\u043e\u0432",
+        "operationId": "Auth_GetTariffs",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoGetTariffsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/update_projects": {
+      "post": {
+        "description": "\u0414\u043b\u044f \u043e\u0431\u043d\u043e\u0432\u043b\u0435\u043d\u0438\u044f \u043f\u0440\u043e\u0435\u043a\u0442\u0430",
+        "operationId": "Auth_UpdateProject",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoProject"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoUpdateProjectRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/subgraph/create": {
+      "post": {
+        "description": "\u0421\u043e\u0437\u0434\u0430\u0435\u0442 \u043d\u043e\u0432\u044b\u0439 \u0441\u0430\u0431\u0433\u0440\u0430\u0444 \u043d\u0430 \u043e\u0441\u043d\u043e\u0432\u0435 \u043f\u0435\u0440\u0435\u0434\u0430\u043d\u043d\u044b\u0445 \u0434\u0430\u043d\u043d\u044b\u0445",
+        "operationId": "SubgraphService_CreateSubgraph",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoCreateSubgraphResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoCreateSubgraphRequest"
+            }
+          }
+        ],
+        "tags": [
+          "SubgraphService"
+        ]
+      }
+    },
+    "/subgraph/create_batch": {
+      "post": {
+        "description": "\u0421\u043e\u0437\u0434\u0430\u0435\u0442 \u043d\u0435\u0441\u043a\u043e\u043b\u044c\u043a\u043e \u0441\u0430\u0431\u0433\u0440\u0430\u0444\u043e\u0432 \u0437\u0430 \u043e\u0434\u0438\u043d \u0432\u044b\u0437\u043e\u0432",
+        "operationId": "SubgraphService_CreateSubgraphBatch",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protoCreateSubgraphBatchResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoCreateSubgraphBatchRequest"
+            }
+          }
+        ],
+        "tags": [
+          "SubgraphService"
+        ]
+      }
+    },
+    "/subgraph/delete": {
+      "post": {
+        "description": "\u0423\u0434\u0430\u043b\u044f\u0435\u0442 \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0443\u044e\u0449\u0438\u0439 \u0441\u0430\u0431\u0433\u0440\u0430\u0444",
+        "operationId": "SubgraphService_DeleteSubgraph",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protoDeleteSubgraphRequest"
+            }
+          }
+        ],
+        "tags": [
+          "SubgraphService"
+        ]
+      }
+    }
+  }
+}

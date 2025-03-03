@@ -5,12 +5,14 @@ import (
 	"fmt"
 	i "git.web3gate.ru/web3/nft/GraphForge/internal/interfaces"
 	"github.com/ethereum/go-ethereum/core/types"
-	"log/slog"
+	"go.uber.org/zap"
 	"sync"
 	"time"
 )
 
 type Supervisor struct {
+	network string
+
 	producer i.Producer
 	storage  i.Storage
 	graph    i.Graph
@@ -24,7 +26,7 @@ type Supervisor struct {
 
 	delay time.Duration
 
-	log    *slog.Logger
+	log    *zap.Logger
 	ctx    context.Context
 	cancel context.CancelFunc
 
@@ -36,29 +38,21 @@ type Supervisor struct {
 // It also loads existing contracts from storage and prepares channels for communication.
 func NewSupervisor(
 	ctx context.Context,
+	network string,
 	producer i.Producer,
 	storage i.Storage,
 	graph i.Graph,
-	log *slog.Logger,
+	log *zap.Logger,
 	delay time.Duration,
-	inputData []string) *Supervisor {
+) *Supervisor {
 	ctx, cancel := context.WithCancel(ctx)
 
-	input := make(map[string]struct{})
-
 	newC := make(map[string]struct{})
-	if len(inputData) != 0 {
-		for _, v := range inputData {
-			input[v] = struct{}{}
-		}
-		storage.LoadContracts(ctx, input, newC)
-	} else {
-		storage.Initialized(ctx, newC)
-	}
-
+	storage.Initialized(ctx, network, newC)
 	blocksCh := make(chan *types.Block, 1)
 
 	return &Supervisor{
+		network:  network,
 		producer: producer,
 		storage:  storage,
 		graph:    graph,
@@ -85,8 +79,6 @@ func NewSupervisor(
 // 3. Periodically initializes contracts in the graph.
 // This function blocks the current goroutine and should be stopped using the Stop() method.
 func (s *Supervisor) Spin() {
-	s.log.Info("spinFunc: running app")
-
 	s.handleErrorsLoop()
 	s.produce()
 
@@ -100,7 +92,7 @@ func (s *Supervisor) Spin() {
 				if _, exist := s.newContracts[addr]; !exist {
 					if _, exist = s.usedContracts[addr]; !exist {
 						s.newContracts[addr] = struct{}{}
-						s.log.Debug("got new contract to initialize:", slog.String("address", addr))
+						s.log.Debug("got new contract to initialize:", zap.String("address", addr))
 					}
 				}
 				s.Unlock()
@@ -133,7 +125,7 @@ func (s *Supervisor) handleErrorsLoop() {
 				return
 			case err := <-s.errCh:
 				if err != nil {
-					s.log.Error("InitContracts:", slog.Any("error", err))
+					s.log.Error("InitContracts:", zap.Any("error", err))
 				}
 			}
 		}
@@ -170,7 +162,7 @@ func (s *Supervisor) InitContracts(init bool) error {
 		}
 
 		if !init {
-			if err := s.storage.SaveContract(s.ctx, contract); err != nil {
+			if err := s.storage.SaveContract(s.ctx, contract, s.network); err != nil {
 				return err
 			}
 		}
@@ -179,7 +171,7 @@ func (s *Supervisor) InitContracts(init bool) error {
 
 		delete(s.newContracts, contract)
 
-		s.log.Debug("Deployed contract", slog.String("address", contract))
+		s.log.Debug("Deployed contract", zap.String("address", contract))
 		s.Unlock()
 	}
 
@@ -203,6 +195,7 @@ func (s *Supervisor) produce() *Supervisor {
 				block, err := s.producer.Block()
 				if block == nil {
 					s.errCh <- fmt.Errorf("block is nil")
+					return
 				}
 				if err != nil {
 					s.errCh <- err
@@ -223,7 +216,7 @@ func (s *Supervisor) produce() *Supervisor {
 // Stop gracefully shuts down the Supervisor.
 // It stops the producer, cancels the context, and closes all communication channels.
 func (s *Supervisor) Stop() {
-	s.log.Info("shutting down the app")
+	s.log.Info("shutting down the Forge..")
 
 	s.producer.Stop()
 	s.cancel()

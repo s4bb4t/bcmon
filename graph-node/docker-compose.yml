@@ -60,18 +60,18 @@ services:
       #      - /opt/graph-node/ipfs:/data/ipfs:rw
       - ./data/ipfs:/data/ipfs
 
-  testgraph:
-    image: testgraph:latest
-    container_name: testgraph
-    environment:
-      VAULT_ADDRESS: https://10.255.13.3:8200
-      VAULT_SECRET_ID: 8280274b-ddd1-5dda-b6be-9a471761bf37
-      VAULT_SECRET_PATH: secrets/data/dev-creds/nft-graph-forge
-      VAULT_ROLE_ID: e46739d6-78f0-2dca-c9b2-115def23b50b
-    command:
-      [
-        "export PATH=$PATH$:/node_modules/.bin/"
-      ]
-    depends_on:
-      - graph-node
-    volumes: ./subgraphs:./bin/subgraphs
+#  testgraph:
+#    image: testgraph:latest
+#    container_name: testgraph
+#    environment:
+#      VAULT_ADDRESS: https://10.255.13.3:8200
+#      VAULT_SECRET_ID: 8280274b-ddd1-5dda-b6be-9a471761bf37
+#      VAULT_SECRET_PATH: secrets/data/dev-creds/nft-graph-forge
+#      VAULT_ROLE_ID: e46739d6-78f0-2dca-c9b2-115def23b50b
+#    command:
+#      [
+#        "export PATH=$PATH$:/node_modules/.bin/"
+#      ]
+#    depends_on:
+#      - graph-node
+#    volumes: ./subgraphs:./bin/subgraphs

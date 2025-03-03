@@ -8,28 +8,19 @@ import (
 	"git.web3gate.ru/web3/nft/GraphForge/internal/graph"
 	"git.web3gate.ru/web3/nft/GraphForge/internal/storage"
 	appcloser "git.web3gate.ru/web3/nft/GraphForge/pkg/app_closer"
+	"git.web3gate.ru/web3/nft/GraphForge/pkg/logger"
 	"git.web3gate.ru/web3/nft/GraphForge/pkg/pgsql/migrator"
 	"git.web3gate.ru/web3/nft/GraphForge/pkg/pgsql/pgconnector"
+	"go.uber.org/zap"
 	"io"
-	"log/slog"
 	"os"
 	"os/exec"
 	"os/signal"
-	"sync"
 	"syscall"
 )
 
 func init() {
-	cmd := exec.Command("npm", "install", "@graphprotocol/graph-cli")
-	cmd.Dir = "./"
-	cmd.Stdout = io.Discard
-	cmd.Stderr = os.Stderr
-
-	if err := cmd.Run(); err != nil {
-		panic(err)
-	}
-
-	cmd = exec.Command("npm", "install", "@graphprotocol/graph-ts")
+	cmd := exec.Command("npm", "install")
 	cmd.Dir = "./"
 	cmd.Stdout = io.Discard
 	cmd.Stderr = os.Stderr
@@ -43,7 +34,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT)
 	defer stop()
 
-	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+	log := logger.FromEnv("[graph-forge]")
 
 	cfg := config.CreateConfig()
 
@@ -56,82 +47,34 @@ func main() {
 		cfg.Db.Postgres.GetIdleTime(),
 		closer)
 	if err != nil {
-		logger.Error("pgConnector creation error", slog.Any("err", err))
+		log.Error("pgConnector creation error", zap.Any("err", err))
 	}
-
 	if err := migrator.Migrate(pgConnector); err != nil {
-		logger.Error("migrator error", slog.Any("err", err))
+		log.Error("migrator error", zap.Any("err", err))
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		logger := logger.With(slog.String("network", "sepolia"))
-
-		if err := cfg.Sepolia.ValidateNetwork(); err != nil {
-			logger.Warn("Sepolia", slog.Any("error", err), slog.String("msg", "ignore it if you don't need sepolia forge"))
-			return
-		}
-
-		repo := storage.NewStorage(ctx, pgConnector, logger)
-		theGraph := graph.NewGraph(cfg.Sepolia.GetNetwork(), cfg.GetSubgraphPath(), cfg.Sepolia.GetGraphNodeURL(), logger)
-		producer := eth.NewProducer(cfg.Sepolia.GetUpstreamURL(), cfg.Sepolia.GetRequestDelay(), logger)
+	for _, network := range cfg.Networks {
+		log := log.With(zap.String("network", network.Name))
+		repo := storage.NewStorage(ctx, pgConnector, log)
+		theGraph := graph.NewGraph(network.Name, cfg.GetSubgraphPath(), cfg.GetGraphNodeURL(), log)
+		producer := eth.NewProducer(network.UpstreamURL, network.GetRequestDelay(), log, make(chan string))
 
 		app := application.NewSupervisor(
 			ctx,
+			network.Name,
 			producer,
 			repo,
 			theGraph,
-			logger,
-			cfg.Sepolia.GetUpdateDelay(),
-			cfg.GetInputData())
+			log,
+			network.UpdateDelay,
+		)
 
-		//if err := app.InitContracts(true); err != nil {
-		//	panic(err)
-		//}
+		closer.AddCloser(app.Stop, network.Name)
 
 		go app.Spin()
-		select {
-		case <-ctx.Done():
-			app.Stop()
-		}
-	}()
+	}
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		logger := logger.With(slog.String("network", "holesky"))
-
-		if err := cfg.Holesky.ValidateNetwork(); err != nil {
-			logger.Warn("Holesky", slog.Any("error", err), slog.String("msg", "ignore it if you don't need mainnet forge"))
-			return
-		}
-
-		repo := storage.NewStorage(ctx, pgConnector, logger)
-		theGraph := graph.NewGraph(cfg.Holesky.GetNetwork(), cfg.GetSubgraphPath(), cfg.Holesky.GetGraphNodeURL(), logger)
-		producer := eth.NewProducer(cfg.Holesky.GetUpstreamURL(), cfg.Holesky.GetRequestDelay(), logger)
-
-		app := application.NewSupervisor(
-			ctx,
-			producer,
-			repo,
-			theGraph,
-			logger,
-			cfg.Holesky.GetUpdateDelay(),
-			cfg.GetInputData())
-
-		//if err := app.InitContracts(true); err != nil {
-		//	panic(err)
-		//}
-
-		go app.Spin()
-		select {
-		case <-ctx.Done():
-			app.Stop()
-			wg.Done()
-		}
-	}()
-
-	wg.Wait()
+	select {
+	case <-ctx.Done():
+	}
 }

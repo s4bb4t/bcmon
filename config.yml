@@ -1,9 +1,9 @@
 db:
   postgres:
     user: "graph-node"
-    password: "let-me-in"
+    password: "rt-password"
     db_name: "graph-node"
-    host: "localhost"
+    host: "192.168.0.40"
     port: "5432"
     ssl_mode: "disable"
     max_open_conns: 50
@@ -11,17 +11,23 @@ db:
     conn_max_idle_time_sec: 30
 
 subgraph_path: "./subgraphs"
+graph_node_url: "http://192.168.0.40:8020" # USE ONLY ADMIN PORT
 
-sepolia:
-  upstream_url: "https://b.dev.web3gate.ru:32443/c84877a7-9020-4acf-a53f-002a793934fc" # sepolia
-  name: "sepolia"
-  graph_node_url: "http://localhost:8020" # USE ONLY ADMIN PORT
-  update_delay: "1m"
-  request_delay: "500ms"
+networks:
+  - sepolia:
+    upstream_url: "https://b.web3gate.ru/b4bfd510-520f-4f3e-b2e3-723f04cebf0e" # sepolia
+    name: "sepolia"
+    update_delay: "180s"
+    request_delay: "1000ms"
 
-#holesky:
-#  upstream_url: "https://b.dev.web3gate.ru:32443/722dd4b7-d6b2-4f40-93a6-ca9988ebcb80" # holesky
-#  name: "sepolia"
-#  graph_node_url: "http://localhost:8020" # USE ONLY ADMIN PORT
-#  update_delay: "1m"
-#  request_delay: "3s"
+  - holesky:
+    upstream_url: "https://b.web3gate.ru/bf549096-a79d-42bf-b902-515b3eef7830" # sepolia
+    name: "holesky"
+    update_delay: "120s"
+    request_delay: "1000ms"
+
+  - mainnet:
+    upstream_url: "https://b.web3gate.ru/eca6db8b-45d9-446c-bafa-5ea9bc5e1ce0" # sepolia
+    name: "mainnet"
+    update_delay: "60s"
+    request_delay: "1000ms"

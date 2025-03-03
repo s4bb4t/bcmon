@@ -1,8 +1,8 @@
 package graph
 
 import (
+	"go.uber.org/zap"
 	"io"
-	"log/slog"
 	"os"
 	"os/exec"
 )
@@ -12,10 +12,10 @@ type Graph struct {
 	network string
 	nodeURL string
 
-	log *slog.Logger
+	log *zap.Logger
 }
 
-func NewGraph(network, path, node string, log *slog.Logger) *Graph {
+func NewGraph(network, path, node string, log *zap.Logger) *Graph {
 	return &Graph{log: log, network: network, path: path, nodeURL: node}
 }
 
