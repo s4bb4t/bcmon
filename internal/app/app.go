@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"git.web3gate.ru/web3/nft/GraphForge/internal/entity"
 	i "git.web3gate.ru/web3/nft/GraphForge/internal/interfaces"
 	"github.com/ethereum/go-ethereum/core/types"
 	"go.uber.org/zap"
@@ -11,17 +12,15 @@ import (
 )
 
 type Supervisor struct {
-	network string
-
 	producer i.Producer
 	storage  i.Storage
 	graph    i.Graph
 
-	usedContracts map[string]struct{}
-	newContracts  map[string]struct{}
+	usedContracts map[string]string
+	newContracts  map[string]string
 
 	blocksCh    chan *types.Block
-	contractsCh chan string
+	contractsCh chan entity.Deployment
 	errCh       chan error
 
 	delay time.Duration
@@ -47,17 +46,16 @@ func NewSupervisor(
 ) *Supervisor {
 	ctx, cancel := context.WithCancel(ctx)
 
-	newC := make(map[string]struct{})
+	newC := make(map[string]string)
 	storage.Initialized(ctx, network, newC)
 	blocksCh := make(chan *types.Block, 1)
 
 	return &Supervisor{
-		network:  network,
 		producer: producer,
 		storage:  storage,
 		graph:    graph,
 
-		usedContracts: make(map[string]struct{}),
+		usedContracts: make(map[string]string),
 		newContracts:  newC,
 
 		blocksCh:    blocksCh,
@@ -89,10 +87,10 @@ func (s *Supervisor) Spin() {
 				return
 			case addr := <-s.contractsCh:
 				s.Lock()
-				if _, exist := s.newContracts[addr]; !exist {
-					if _, exist = s.usedContracts[addr]; !exist {
-						s.newContracts[addr] = struct{}{}
-						s.log.Debug("got new contract to initialize:", zap.String("address", addr))
+				if _, exist := s.newContracts[addr.Contract]; !exist {
+					if _, exist = s.usedContracts[addr.Contract]; !exist {
+						s.newContracts[addr.Contract] = addr.Network
+						s.log.Debug("contract to initialize:", zap.String("address", addr.Contract))
 					}
 				}
 				s.Unlock()
@@ -138,36 +136,36 @@ func (s *Supervisor) handleErrorsLoop() {
 func (s *Supervisor) InitContracts(init bool) error {
 	realExist := s.graph.RealExist()
 
-	for contract := range s.newContracts {
+	for contract, network := range s.newContracts {
 		s.Lock()
 
 		if _, exist := realExist[contract]; exist {
 			delete(s.newContracts, contract)
 		}
 
-		if err := s.graph.Init(contract); err != nil {
-			s.errCh <- err
-			s.Unlock()
-			continue
-		}
-		if err := s.graph.Create(contract); err != nil {
-			s.errCh <- err
-			s.Unlock()
-			continue
-		}
-		if err := s.graph.Deploy(contract); err != nil {
-			s.errCh <- err
-			s.Unlock()
-			continue
-		}
+		//if err := s.graph.Init(contract); err != nil {
+		//	s.errCh <- err
+		//	s.Unlock()
+		//	continue
+		//}
+		//if err := s.graph.Create(contract); err != nil {
+		//	s.errCh <- err
+		//	s.Unlock()
+		//	continue
+		//}
+		//if err := s.graph.Deploy(contract); err != nil {
+		//	s.errCh <- err
+		//	s.Unlock()
+		//	continue
+		//}
+		//
+		//if !init {
+		//	if err := s.storage.SaveContract(s.ctx, contract, network); err != nil {
+		//		return err
+		//	}
+		//}
 
-		if !init {
-			if err := s.storage.SaveContract(s.ctx, contract, s.network); err != nil {
-				return err
-			}
-		}
-
-		s.usedContracts[contract] = struct{}{}
+		s.usedContracts[contract] = network
 
 		delete(s.newContracts, contract)
 
@@ -175,6 +173,7 @@ func (s *Supervisor) InitContracts(init bool) error {
 		s.Unlock()
 	}
 
+	fmt.Println(s.usedContracts)
 	s.log.Info("All new contracts successfully initialized!")
 	return nil
 }

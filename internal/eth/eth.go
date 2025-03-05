@@ -2,6 +2,7 @@ package eth
 
 import (
 	"context"
+	"git.web3gate.ru/web3/nft/GraphForge/internal/entity"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -28,11 +29,14 @@ const (
 )
 
 type producer struct {
+	protocol string
+	network  string
+
 	log    *zap.Logger
 	client *ethclient.Client
 
 	receiptsCh chan *types.Receipt
-	outCh      chan string
+	outCh      chan entity.Deployment
 
 	delay time.Duration
 
@@ -40,7 +44,7 @@ type producer struct {
 	cancel context.CancelFunc
 }
 
-func NewProducer(source string, delay time.Duration, log *zap.Logger, contracts chan string) *producer {
+func NewProducer(source string, delay time.Duration, log *zap.Logger, contracts chan entity.Deployment) *producer {
 	client, err := ethclient.Dial(source)
 	if err != nil {
 		panic(err)
@@ -115,15 +119,25 @@ func (p *producer) handleReceipts() {
 						continue
 					}
 
+					dep := entity.Deployment{
+						Protocol: p.protocol,
+						Network:  p.network,
+						Contract: logEntry.Address.Hex(),
+					}
+
 					switch logEntry.Topics[0].Hex() {
 					case transfer:
 						if p.isERC721(logEntry.Address) {
-							contractAddress := logEntry.Address.Hex()
-							p.outCh <- contractAddress
+							dep.Type = entity.ERC721Type
+							p.outCh <- dep
+
+						} else {
+							dep.Type = entity.ERC20Type
+							p.outCh <- dep
 						}
 					case transferSingle, transferBatch:
-						contractAddress := logEntry.Address.Hex()
-						p.outCh <- contractAddress
+						dep.Type = entity.ERC1155Type
+						p.outCh <- dep
 					}
 				}
 			}
@@ -168,7 +182,7 @@ func (p *producer) callSupportsInterface(contractAddress common.Address, interfa
 	return supported, nil
 }
 
-func (p *producer) Out() chan string {
+func (p *producer) Out() chan entity.Deployment {
 	return p.outCh
 }
 

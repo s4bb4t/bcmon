@@ -29,7 +29,7 @@ func (s *storage) SaveContract(ctx context.Context, address, network string) err
 	return err
 }
 
-func (s *storage) Initialized(ctx context.Context, network string, dest map[string]struct{}) {
+func (s *storage) Initialized(ctx context.Context, network string, dest map[string]string) {
 	rows, err := s.db.QueryContext(ctx, `select address from public.contract where network = $1`, network)
 	if err != nil {
 		panic(err)
@@ -40,6 +40,6 @@ func (s *storage) Initialized(ctx context.Context, network string, dest map[stri
 		if err := rows.Scan(&address); err != nil {
 			panic(err)
 		}
-		dest[address] = struct{}{}
+		dest[address] = network
 	}
 }

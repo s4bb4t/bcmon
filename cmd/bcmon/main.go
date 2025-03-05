@@ -4,6 +4,7 @@ import (
 	"context"
 	application "git.web3gate.ru/web3/nft/GraphForge/internal/app"
 	"git.web3gate.ru/web3/nft/GraphForge/internal/config"
+	"git.web3gate.ru/web3/nft/GraphForge/internal/entity"
 	"git.web3gate.ru/web3/nft/GraphForge/internal/eth"
 	"git.web3gate.ru/web3/nft/GraphForge/internal/graph"
 	"git.web3gate.ru/web3/nft/GraphForge/internal/storage"
@@ -57,7 +58,7 @@ func main() {
 		log := log.With(zap.String("network", network.Name))
 		repo := storage.NewStorage(ctx, pgConnector, log)
 		theGraph := graph.NewGraph(network.Name, cfg.GetSubgraphPath(), cfg.GetGraphNodeURL(), log)
-		producer := eth.NewProducer(network.UpstreamURL, network.GetRequestDelay(), log, make(chan string))
+		producer := eth.NewProducer(network.UpstreamURL, network.GetRequestDelay(), log, make(chan entity.Deployment))
 
 		app := application.NewSupervisor(
 			ctx,
