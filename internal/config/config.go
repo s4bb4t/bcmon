@@ -46,7 +46,7 @@ func (c *Config) UpstreamURL(net string) string {
 
 func (c *Config) GetGraphNodeURL() string {
 	if c.GraphNodeURL == "" {
-		panic("network is not set, please set `mainnet` or `sepolia`")
+		panic("GraphNodeURL is not set")
 	}
 	return c.GraphNodeURL
 }
