@@ -143,27 +143,27 @@ func (s *Supervisor) InitContracts(init bool) error {
 			delete(s.newContracts, contract)
 		}
 
-		//if err := s.graph.Init(contract); err != nil {
-		//	s.errCh <- err
-		//	s.Unlock()
-		//	continue
-		//}
-		//if err := s.graph.Create(contract); err != nil {
-		//	s.errCh <- err
-		//	s.Unlock()
-		//	continue
-		//}
-		//if err := s.graph.Deploy(contract); err != nil {
-		//	s.errCh <- err
-		//	s.Unlock()
-		//	continue
-		//}
-		//
-		//if !init {
-		//	if err := s.storage.SaveContract(s.ctx, contract, network); err != nil {
-		//		return err
-		//	}
-		//}
+		if err := s.graph.Init(contract); err != nil {
+			s.errCh <- err
+			s.Unlock()
+			continue
+		}
+		if err := s.graph.Create(contract); err != nil {
+			s.errCh <- err
+			s.Unlock()
+			continue
+		}
+		if err := s.graph.Deploy(contract); err != nil {
+			s.errCh <- err
+			s.Unlock()
+			continue
+		}
+
+		if !init {
+			if err := s.storage.SaveContract(s.ctx, contract, network); err != nil {
+				return err
+			}
+		}
 
 		s.usedContracts[contract] = network
 

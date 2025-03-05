@@ -44,14 +44,7 @@ type producer struct {
 	cancel context.CancelFunc
 }
 
-func NewProducer(source string, delay time.Duration, log *zap.Logger, contracts chan entity.Deployment) *producer {
-	client, err := ethclient.Dial(source)
-	if err != nil {
-		panic(err)
-	}
-
-	log.Debug("client", zap.String("address", source))
-
+func NewProducer(client *ethclient.Client, delay time.Duration, log *zap.Logger, contracts chan entity.Deployment) *producer {
 	receiptCh := make(chan *types.Receipt, 1)
 	ctx, cancel := context.WithCancel(context.Background())
 

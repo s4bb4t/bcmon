@@ -25,4 +25,12 @@ type (
 		SaveContract(ctx context.Context, address, network string) error
 		Initialized(ctx context.Context, network string, dest map[string]string)
 	}
+
+	Deployer interface {
+		CreateSubgraph(context.Context, entity.Deployment) error
+	}
+
+	Detector interface {
+		Type(context.Context, entity.Deployment) (string, error)
+	}
 )

@@ -5,13 +5,15 @@ import (
 	"fmt"
 	g "git.web3gate.ru/web3/nft/GraphForge/grpc/forge"
 	"git.web3gate.ru/web3/nft/GraphForge/internal/entity"
+	"git.web3gate.ru/web3/nft/GraphForge/internal/interfaces"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type deployerServer struct {
 	log *zap.Logger
-	dep Deployer
+	dep interfaces.Deployer
+	dec interfaces.Detector
 	g.UnimplementedSubgraphServiceServer
 }
 
@@ -22,7 +24,7 @@ func (s *deployerServer) CreateSubgraph(ctx context.Context, params *g.CreateSub
 		Contract: params.GetContractAddress(),
 	}
 
-	_type, err := s.dep.Type(ctx, deployment)
+	_type, err := s.dec.Type(ctx, deployment)
 	if err != nil {
 		return nil, fmt.Errorf("failed to define type of contract: %w", err)
 	}
@@ -45,7 +47,7 @@ func (s *deployerServer) CreateSubgraphBatch(ctx context.Context, params *g.Crea
 			Contract: ent.GetContractAddress(),
 		}
 
-		_type, err := s.dep.Type(ctx, deployment)
+		_type, err := s.dec.Type(ctx, deployment)
 		if err != nil {
 			return nil, fmt.Errorf("failed to define type of contract: %w", err)
 		}
