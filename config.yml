@@ -20,11 +20,11 @@ networks:
     update_delay: "60s"
     request_delay: "500ms"
 
-  - holesky:
-    upstream_url: "https://b.dev.web3gate.ru:32443/b0ba9939-7e34-4a4c-a143-df29f6edfa56"
-    name: "holesky"
-    update_delay: "60s"
-    request_delay: "500ms"
+#  - holesky:
+#    upstream_url: "https://b.dev.web3gate.ru:32443/b0ba9939-7e34-4a4c-a143-df29f6edfa56"
+#    name: "holesky"
+#    update_delay: "60s"
+#    request_delay: "500ms"
 
 #  - mainnet:
 #    upstream_url: "https://b.web3gate.ru/eca6db8b-45d9-446c-bafa-5ea9bc5e1ce0"
