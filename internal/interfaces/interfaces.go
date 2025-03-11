@@ -2,15 +2,13 @@ package interfaces
 
 import (
 	"context"
-	"git.web3gate.ru/web3/nft/GraphForge/internal/entity"
-	"github.com/ethereum/go-ethereum/core/types"
+	ent "git.web3gate.ru/web3/nft/GraphForge/internal/entity"
+	"math/big"
 )
 
 type (
 	Producer interface {
-		Addresses(chan *types.Block)
-		Block() (*types.Block, error)
-		Out() chan entity.Deployment
+		Produce(lastBlockNumber *big.Int) (chan *big.Int, chan *ent.Contract, chan error)
 		Stop()
 	}
 
@@ -22,15 +20,22 @@ type (
 	}
 
 	Storage interface {
-		SaveContract(ctx context.Context, address, network string) error
-		Initialized(ctx context.Context, network string, dest map[string]string)
+		SaveContractForge(ctx context.Context, num *big.Int, contractID int64) error
+		SaveBlock(ctx context.Context, num *big.Int) error
+		BlockHandled(ctx context.Context, num *big.Int) error
+
+		LastBlock() (*big.Int, error)
+		Initialized(ctx context.Context, contract *ent.Contract) bool
+
+		SaveContract(ctx context.Context, dep *ent.Contract) (contractID int64, err error)
 	}
 
 	Deployer interface {
-		CreateSubgraph(context.Context, entity.Deployment) error
+		CreateSubgraph(context.Context, *ent.Contract) error
 	}
 
 	Detector interface {
-		Type(context.Context, entity.Deployment) (string, error)
+		Type(ctx context.Context, deployment *ent.Contract) (string, error)
+		LoadInfo(ctx context.Context, contract *ent.Contract) error
 	}
 )

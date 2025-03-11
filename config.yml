@@ -1,9 +1,9 @@
 db:
   postgres:
-    user: "graph-node"
-    password: "rt-password"
-    db_name: "graph-node"
-    host: "192.168.0.40"
+    user: "web3user"
+    password: "hoCeey9g"
+    db_name: "web3db"
+    host: "10.255.13.2"
     port: "5432"
     ssl_mode: "disable"
     max_open_conns: 50
@@ -15,7 +15,7 @@ graph_node_url: "http://192.168.0.40:8020" # USE ONLY ADMIN PORT
 
 networks:
   - sepolia:
-    upstream_url: "https://b.dev.web3gate.ru:32443/ea189d6e-f115-4187-a088-fd1f0a0b41d7"
+    upstream_url: "https://b.dev.web3gate.ru:32443/825f3b35-b510-41fd-8e46-18cf214b8602"
     name: "sepolia"
     update_delay: "60s"
     request_delay: "500ms"

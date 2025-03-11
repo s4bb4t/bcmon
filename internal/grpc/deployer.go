@@ -11,53 +11,55 @@ import (
 )
 
 type deployerServer struct {
-	log *zap.Logger
-	dep interfaces.Deployer
-	dec interfaces.Detector
+	log  *zap.Logger
+	dep  interfaces.Deployer
+	dec  interfaces.Detector
+	repo interfaces.Storage
 	g.UnimplementedSubgraphServiceServer
 }
 
 func (s *deployerServer) CreateSubgraph(ctx context.Context, params *g.CreateSubgraphRequest) (*g.CreateSubgraphResponse, error) {
-	deployment := entity.Deployment{
-		Protocol: params.GetProtocol(),
-		Network:  params.GetNetwork(),
-		Contract: params.GetContractAddress(),
+	contract := &entity.Contract{
+		Network: params.GetNetwork(),
+		ChainID: entity.Atoi[params.GetNetwork()],
+		Address: params.GetContractAddress(),
 	}
 
-	_type, err := s.dec.Type(ctx, deployment)
-	if err != nil {
-		return nil, fmt.Errorf("failed to define type of contract: %w", err)
+	if s.repo.Initialized(ctx, contract) {
+		return &g.CreateSubgraphResponse{SubgraphId: contract.Network + "/" + contract.Address}, nil
 	}
-	deployment.Type = _type
 
-	if err := s.dep.CreateSubgraph(ctx, deployment); err != nil {
+	if err := s.dec.LoadInfo(ctx, contract); err != nil {
+		return nil, fmt.Errorf("failed to load info about contract")
+	}
+
+	if err := s.dep.CreateSubgraph(ctx, contract); err != nil {
 		return nil, fmt.Errorf("failed to create subgraph: %w", err)
 	}
 
-	return &g.CreateSubgraphResponse{SubgraphId: deployment.Network + "/" + deployment.Contract}, nil
+	return &g.CreateSubgraphResponse{SubgraphId: contract.Network + "/" + contract.Address}, nil
 }
 
 func (s *deployerServer) CreateSubgraphBatch(ctx context.Context, params *g.CreateSubgraphBatchRequest) (*g.CreateSubgraphBatchResponse, error) {
 	var ids []string
 
 	for _, ent := range params.Subgraphs {
-		deployment := entity.Deployment{
-			Protocol: ent.GetProtocol(),
-			Network:  ent.GetNetwork(),
-			Contract: ent.GetContractAddress(),
+		contract := entity.Contract{
+			Network: ent.GetNetwork(),
+			Address: ent.GetContractAddress(),
 		}
 
-		_type, err := s.dec.Type(ctx, deployment)
+		_type, err := s.dec.Type(ctx, &contract)
 		if err != nil {
 			return nil, fmt.Errorf("failed to define type of contract: %w", err)
 		}
-		deployment.Type = _type
+		contract.Type = _type
 
-		if err := s.dep.CreateSubgraph(ctx, deployment); err != nil {
+		if err := s.dep.CreateSubgraph(ctx, &contract); err != nil {
 			return nil, fmt.Errorf("failed to create subgraph: %w", err)
 		}
 
-		ids = append(ids, deployment.Network+"/"+deployment.Contract)
+		ids = append(ids, contract.Network+"/"+contract.Address)
 	}
 
 	return &g.CreateSubgraphBatchResponse{SubgraphIds: ids}, nil

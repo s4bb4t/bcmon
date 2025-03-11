@@ -12,13 +12,13 @@ pool_size = 5
 [chains]
 ingestor = "block_ingestor_node"
 
-[chains.mainnet]
-shard = "primary"
-provider = [ { label = "mainnet", url = "https://mainnet.infura.io/v3/726da33cd7d94de49d09c2b69612d199", features = [] } ]
-
-# [chains.sepolia]
+# [chains.mainnet]
 # shard = "primary"
-# provider = [ { label = "sepolia", url = "https://sepolia.infura.io/v3/726da33cd7d94de49d09c2b69612d199", features = [] } ]
+# provider = [ { label = "mainnet", url = "https://mainnet.infura.io/v3/726da33cd7d94de49d09c2b69612d199", features = [] } ]
+
+[chains.sepolia]
+shard = "primary"
+provider = [ { label = "sepolia", url = "https://sepolia.infura.io/v3/726da33cd7d94de49d09c2b69612d199", features = [] } ]
 
 # [chains.holesky]
 # shard = "primary"

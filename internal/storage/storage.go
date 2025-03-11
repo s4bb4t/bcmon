@@ -23,23 +23,3 @@ func NewStorage(ctx context.Context, connector pgconnector.ConnectionManager, lo
 
 	return &storage{log: log, db: db}
 }
-
-func (s *storage) SaveContract(ctx context.Context, address, network string) error {
-	_, err := s.db.ExecContext(context.Background(), `INSERT INTO public.contract (address, network) values($1, $2)`, address, network)
-	return err
-}
-
-func (s *storage) Initialized(ctx context.Context, network string, dest map[string]string) {
-	rows, err := s.db.QueryContext(ctx, `select address from public.contract where network = $1`, network)
-	if err != nil {
-		panic(err)
-	}
-
-	var address string
-	for rows.Next() {
-		if err := rows.Scan(&address); err != nil {
-			panic(err)
-		}
-		dest[address] = network
-	}
-}

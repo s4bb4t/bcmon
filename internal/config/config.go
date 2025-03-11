@@ -27,7 +27,9 @@ type Config struct {
 
 	Networks []Network `mapstructure:"networks" json:"networks"`
 
-	Debug        bool
+	Debug    bool
+	GRPCPort int `mapstructure:"grpc_port" json:"grpc_port"`
+
 	GraphPath    string `mapstructure:"subgraph_path" json:"subgraph_path"`
 	GraphNodeURL string `mapstructure:"graph_node_url" json:"graph_node_url"`
 }
@@ -40,8 +42,8 @@ type Network struct {
 	UpdateDelay  time.Duration `mapstructure:"update_delay" json:"update_delay"`
 }
 
-func (c *Config) UpstreamURL(net string) string {
-	return net
+func (c *Config) GrpcPort() int {
+	return c.GRPCPort
 }
 
 func (c *Config) GetGraphNodeURL() string {

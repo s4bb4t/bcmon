@@ -2,21 +2,21 @@ package main
 
 import (
 	"context"
+	"fmt"
 	application "git.web3gate.ru/web3/nft/GraphForge/internal/app"
 	"git.web3gate.ru/web3/nft/GraphForge/internal/config"
-	"git.web3gate.ru/web3/nft/GraphForge/internal/detector"
-	"git.web3gate.ru/web3/nft/GraphForge/internal/entity"
-	"git.web3gate.ru/web3/nft/GraphForge/internal/eth"
-	"git.web3gate.ru/web3/nft/GraphForge/internal/graph"
+	"git.web3gate.ru/web3/nft/GraphForge/internal/core/explorer"
+	"git.web3gate.ru/web3/nft/GraphForge/internal/core/graph"
+	"git.web3gate.ru/web3/nft/GraphForge/internal/core/producer"
 	"git.web3gate.ru/web3/nft/GraphForge/internal/grpc"
 	"git.web3gate.ru/web3/nft/GraphForge/internal/storage"
 	appcloser "git.web3gate.ru/web3/nft/GraphForge/pkg/app_closer"
 	"git.web3gate.ru/web3/nft/GraphForge/pkg/logger"
-	"git.web3gate.ru/web3/nft/GraphForge/pkg/pgsql/migrator"
 	"git.web3gate.ru/web3/nft/GraphForge/pkg/pgsql/pgconnector"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"go.uber.org/zap"
 	"io"
+	"net"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -51,17 +51,14 @@ func main() {
 		cfg.Db.Postgres.GetIdleTime(),
 		closer)
 	if err != nil {
-		log.Error("pgConnector creation error", zap.Any("err", err))
-	}
-	if err := migrator.Migrate(pgConnector); err != nil {
-		log.Error("migrator error", zap.Any("err", err))
+		log.Panic("pgConnector creation error", zap.Any("err", err))
 	}
 
 	clients := make(map[string]*ethclient.Client)
 	for _, network := range cfg.Networks {
 		client, err := ethclient.Dial(network.UpstreamURL)
 		if err != nil {
-			log.Error("ethclient.Dial error", zap.Any("err", err))
+			log.Panic("ethclient.Dial error", zap.Any("err", err))
 			break
 		}
 		clients[network.Name] = client
@@ -69,12 +66,12 @@ func main() {
 		log := log.With(zap.String("network", network.Name))
 		repo := storage.NewStorage(ctx, pgConnector, log)
 		theGraph := graph.NewGraph(network.Name, cfg.GetSubgraphPath(), cfg.GetGraphNodeURL(), log)
-		producer := eth.NewProducer(client, network.GetRequestDelay(), log, make(chan entity.Deployment))
+		prod := producer.NewProducer(client, log, network.Name)
+		detect := explorer.NewTokenDetector(clients, log)
 
 		app := application.NewSupervisor(
-			ctx,
-			network.Name,
-			producer,
+			detect,
+			prod,
 			repo,
 			theGraph,
 			log,
@@ -86,11 +83,23 @@ func main() {
 		go app.Spin()
 	}
 
-	detect := detector.NewTokenDetector(clients, log)
+	detect := explorer.NewTokenDetector(clients, log)
 	theGraph := graph.NewGraph("universal", cfg.GetSubgraphPath(), cfg.GetGraphNodeURL(), log)
 	server := grpc.InitForgeGRPC(log, theGraph, detect)
 
 	closer.AddCloser(server.GracefulStop, "grpc")
+
+	go func() {
+		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.GrpcPort()))
+		if err != nil {
+			log.Panic("failed to listen:", zap.Error(err))
+		}
+
+		log.Info(fmt.Sprintf("bc auth grpc server is running on %s", fmt.Sprintf(":%d", cfg.GrpcPort())))
+		if err := server.Serve(lis); err != nil {
+			log.Panic("failed to serve:", zap.Error(err))
+		}
+	}()
 
 	<-ctx.Done()
 	go func() {

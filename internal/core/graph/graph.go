@@ -72,14 +72,14 @@ func (g *Graph) Deploy(contract string) error {
 	return cmd.Run()
 }
 
-func (g *Graph) CreateSubgraph(ctx context.Context, dep entity.Deployment) error {
+func (g *Graph) CreateSubgraph(ctx context.Context, contract *entity.Contract) error {
 	if err := os.Mkdir(g.path, 0644); err != nil {
 		if !os.IsExist(err) {
 			return err
 		}
 	}
 
-	cmd := exec.Command("graph", "init", dep.Network+"/"+dep.Contract, dep.Network+"/"+dep.Contract, "--from-contract", dep.Contract, "--network", dep.Network, "--skip-install", "--skip-git", "--abi", "../abi.json")
+	cmd := exec.Command("graph", "init", contract.Network+"/"+contract.Address, contract.Network+"/"+contract.Address, "--from-contract", contract.Address, "--network", contract.Network, "--skip-install", "--skip-git", "--abi", "../abi.json")
 	cmd.Dir = g.path
 	cmd.Stdout = io.Discard
 	cmd.Stderr = os.Stderr
@@ -87,8 +87,8 @@ func (g *Graph) CreateSubgraph(ctx context.Context, dep entity.Deployment) error
 		return err
 	}
 
-	cmd = exec.Command("graph", "create", dep.Network+"/"+dep.Contract, "--node", g.nodeURL)
-	cmd.Dir = g.path + "/" + g.network + "/" + dep.Contract
+	cmd = exec.Command("graph", "create", contract.Network+"/"+contract.Address, "--node", g.nodeURL)
+	cmd.Dir = g.path + "/" + g.network + "/" + contract.Address
 
 	cmd.Stdout = io.Discard
 	cmd.Stderr = os.Stderr
@@ -96,8 +96,8 @@ func (g *Graph) CreateSubgraph(ctx context.Context, dep entity.Deployment) error
 		return err
 	}
 
-	cmd = exec.Command("graph", "deploy", dep.Network+"/"+dep.Contract, "--node", g.nodeURL, "--version-label", "v0.0.1")
-	cmd.Dir = g.path + "/" + g.network + "/" + dep.Contract
+	cmd = exec.Command("graph", "deploy", contract.Network+"/"+contract.Address, "--node", g.nodeURL, "--version-label", "v0.0.1")
+	cmd.Dir = g.path + "/" + g.network + "/" + contract.Address
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
