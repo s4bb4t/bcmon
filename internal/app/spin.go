@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	ent "git.web3gate.ru/web3/nft/GraphForge/internal/entity"
 	"go.uber.org/zap"
 )
 
@@ -31,6 +32,20 @@ func (s *Supervisor) Spin() {
 			case <-done:
 				return
 			case contract := <-contracts:
+
+				// костыль todo: убрать
+				// ---------------------------------------------------------------------
+				_type, err := s.explorer.Type(context.Background(), contract)
+				if err != nil {
+					s.log.Error("failed to get type of contract", zap.Error(err))
+				}
+
+				if _type == ent.ERC20Type {
+					continue
+				}
+				// ---------------------------------------------------------------------
+				//
+
 				s.Lock()
 				if _, exist := s.newContracts[contract.Address]; !exist {
 					if _, exist = s.usedContracts[contract.Address]; !exist {
