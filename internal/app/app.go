@@ -14,8 +14,10 @@ type Supervisor struct {
 	storage  i.Storage
 	graph    i.Graph
 
-	usedContracts map[ent.Contract]struct{}
-	newContracts  map[ent.Contract]struct{}
+	contracts []*ent.Contract
+
+	usedContracts map[string]struct{}
+	newContracts  map[string]struct{}
 
 	delay time.Duration
 
@@ -41,8 +43,8 @@ func NewSupervisor(
 		storage:  storage,
 		graph:    graph,
 
-		usedContracts: make(map[ent.Contract]struct{}),
-		newContracts:  make(map[ent.Contract]struct{}),
+		usedContracts: make(map[string]struct{}),
+		newContracts:  make(map[string]struct{}),
 
 		delay: delay,
 

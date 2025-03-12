@@ -12,15 +12,12 @@ import (
 func (s *storage) LastBlock() (*big.Int, error) {
 	const op = "storage.LastBlock"
 
-	var isHandled bool
 	var blockNum int64
-	if err := s.db.QueryRowContext(context.Background(), `select block_number, is_handled from nft.forge_block order by date desc limit 1`).Scan(&blockNum, &isHandled); err != nil {
+	if err := s.db.QueryRowContext(context.Background(), `select block_number from nft.forge_block where is_handled = true order by date desc limit 1`).Scan(&blockNum); err != nil {
 		return nil, fmt.Errorf("%s: failed to insert: %w", op, err)
 	}
 
-	if isHandled {
-		blockNum++
-	}
+	blockNum++
 
 	return big.NewInt(blockNum), nil
 }

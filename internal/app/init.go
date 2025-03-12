@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	ent "git.web3gate.ru/web3/nft/GraphForge/internal/entity"
 	"go.uber.org/zap"
 )
 
@@ -10,14 +11,16 @@ import (
 // It also marks the contract as "used" after successful initialization.
 func (s *Supervisor) InitContracts(blockNumber int64) error {
 	ctx := context.Background()
+	s.Lock()
+	defer s.Unlock()
 
-	for contract := range s.newContracts {
-		if err := s.explorer.LoadInfo(ctx, &contract); err != nil {
+	for _, contract := range s.contracts {
+		if err := s.explorer.LoadInfo(ctx, contract); err != nil {
 			return err
 		}
 
-		if s.storage.Initialized(ctx, &contract) {
-			s.usedContracts[contract] = struct{}{}
+		if s.storage.Initialized(ctx, contract) {
+			s.usedContracts[contract.Address] = struct{}{}
 			continue
 		}
 
@@ -33,7 +36,7 @@ func (s *Supervisor) InitContracts(blockNumber int64) error {
 			}
 		*/
 
-		contractID, err := s.storage.SaveContract(ctx, &contract)
+		contractID, err := s.storage.SaveContract(ctx, contract)
 		if err != nil {
 			return err
 		}
@@ -42,12 +45,12 @@ func (s *Supervisor) InitContracts(blockNumber int64) error {
 			return err
 		}
 
-		s.usedContracts[contract] = struct{}{}
-		delete(s.newContracts, contract)
+		s.usedContracts[contract.Address] = struct{}{}
+		delete(s.newContracts, contract.Address)
 
-		s.log.Debug("Deployed contract", zap.String("address", contract.Address))
+		s.log.Info("Deployed contract", zap.String("address", contract.Address))
 	}
 
-	s.log.Info("All new contracts successfully initialized!")
+	s.contracts = []*ent.Contract{}
 	return nil
 }

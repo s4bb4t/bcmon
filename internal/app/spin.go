@@ -32,10 +32,11 @@ func (s *Supervisor) Spin() {
 				return
 			case contract := <-contracts:
 				s.Lock()
-				if _, exist := s.newContracts[*contract]; !exist {
-					if _, exist = s.usedContracts[*contract]; !exist {
-						s.newContracts[*contract] = struct{}{}
-						s.log.Debug("contract to initialize:", zap.Any("ent", contract))
+				if _, exist := s.newContracts[contract.Address]; !exist {
+					if _, exist = s.usedContracts[contract.Address]; !exist {
+						s.newContracts[contract.Address] = struct{}{}
+						s.contracts = append(s.contracts, contract)
+						s.log.Debug("contract to initialize:", zap.String("net", contract.Network), zap.String("addr", contract.Address))
 					}
 				}
 				s.Unlock()
@@ -49,7 +50,6 @@ func (s *Supervisor) Spin() {
 			case <-done:
 				return
 			case block := <-blocks:
-				s.Lock()
 				blockID, err := s.storage.SaveBlock(context.Background(), block)
 				if err != nil {
 					errCh <- err
@@ -57,7 +57,7 @@ func (s *Supervisor) Spin() {
 				}
 
 				if err := s.InitContracts(blockID); err != nil {
-					errCh <- err
+					s.log.Error("init error", zap.Error(err))
 					continue
 				}
 
@@ -67,7 +67,6 @@ func (s *Supervisor) Spin() {
 				}
 
 				handled <- struct{}{}
-				s.Unlock()
 			}
 		}
 	}()

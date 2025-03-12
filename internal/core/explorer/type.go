@@ -34,7 +34,7 @@ func (e *Explorer) isERC721(ctx context.Context, network string, contractAddress
 	interfaceID := [4]byte{0x80, 0xac, 0x58, 0xcd}
 	result, err := e.callSupportsInterface(ctx, network, contractAddress, interfaceID)
 	if err != nil {
-		e.log.Debug("Failed to check ERC721 support", zap.Error(err))
+		e.log.Warn("Failed to check ERC721 support", zap.Error(err))
 		return false
 	}
 	return result
@@ -44,7 +44,7 @@ func (e *Explorer) isERC1155(ctx context.Context, network string, contractAddres
 	interfaceID := [4]byte{0xd9, 0xb6, 0x7a, 0x26}
 	result, err := e.callSupportsInterface(ctx, network, contractAddress, interfaceID)
 	if err != nil {
-		e.log.Debug("Failed to check ERC1155 support", zap.Error(err))
+		e.log.Warn("Failed to check ERC1155 support", zap.Error(err))
 		return false
 	}
 	return result
@@ -106,7 +106,7 @@ func (e *Explorer) callSupportsInterface(ctx context.Context, network string, co
 
 	var supported bool
 	if err := Abi.UnpackIntoInterface(&supported, "supportsInterface", result); err != nil {
-		return false, fmt.Errorf("failed to unpack result: %w", err)
+		return false, fmt.Errorf("failed to unpack result: %w, for %s %s", err, network, contractAddress.String())
 	}
 
 	return supported, nil
