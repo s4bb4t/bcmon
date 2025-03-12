@@ -8,7 +8,9 @@ import (
 	"go.uber.org/zap"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 )
 
 func (e *Explorer) etherscanDeploymentBatch(ctx context.Context, chainID int64, contractAddresses []string) (*[]ent.Deployment, error) {
@@ -86,6 +88,13 @@ func (e *Explorer) etherscanDeployment(ctx context.Context, chainID int64, contr
 		e.log.Error("Error decoding JSON from Etherscan API getContractCreation response", zap.Error(err))
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
+
+	unix, err := strconv.Atoi(response.Result[0].TimeUnix)
+	if err != nil {
+		e.log.Error("Error decoding Atoi", zap.Error(err))
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+	response.Result[0].Timestamp = time.Unix(int64(unix), 0)
 
 	if len(response.Result) == 0 {
 		e.log.Debug("No deployment transaction found")

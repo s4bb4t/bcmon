@@ -2,6 +2,7 @@ package explorer
 
 import (
 	"context"
+	"fmt"
 	ent "git.web3gate.ru/web3/nft/GraphForge/internal/entity"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -82,12 +83,12 @@ func (e *Explorer) callSupportsInterface(ctx context.Context, network string, co
 
 	Abi, err := abi.JSON(strings.NewReader(abiJSON))
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("failed to parse ABI: %w", err)
 	}
 
 	data, err := Abi.Pack("supportsInterface", interfaceID)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("failed to pack data: %w", err)
 	}
 
 	msg := ethereum.CallMsg{
@@ -97,12 +98,15 @@ func (e *Explorer) callSupportsInterface(ctx context.Context, network string, co
 
 	result, err := e.clients[network].CallContract(ctx, msg, nil)
 	if err != nil {
-		return false, err
+		if strings.Contains(err.Error(), "execution reverted") {
+			return false, nil
+		}
+		return false, fmt.Errorf("call contract failed: %w", err)
 	}
 
 	var supported bool
 	if err := Abi.UnpackIntoInterface(&supported, "supportsInterface", result); err != nil {
-		return false, err
+		return false, fmt.Errorf("failed to unpack result: %w", err)
 	}
 
 	return supported, nil

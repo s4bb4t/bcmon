@@ -7,12 +7,13 @@ import (
 
 type (
 	Deployment struct {
-		ContractCreator  string    `json:"contractCreator"`
-		TxHash           string    `json:"txHash"`
-		BlockNumber      int       `json:"blockNumber"`
-		Timestamp        time.Time `json:"timestamp"`
-		ContractFactory  string    `json:"contractFactory"`
-		CreationByteCode string    `json:"creationBytecode"`
+		ContractCreator  string `json:"contractCreator"`
+		TxHash           string `json:"txHash"`
+		BlockNumber      string `json:"blockNumber"`
+		TimeUnix         string `json:"timestamp"`
+		Timestamp        time.Time
+		ContractFactory  string `json:"contractFactory"`
+		CreationByteCode string `json:"creationBytecode"`
 	}
 
 	Contract struct {

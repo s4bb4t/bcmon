@@ -2,23 +2,19 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"go.uber.org/zap"
 )
 
 // InitContracts initializes new contracts in the graph and saves them to storage.
 // If `init` is true, it checks if the contract already exists in the graph before initializing.
 // It also marks the contract as "used" after successful initialization.
-func (s *Supervisor) InitContracts() error {
+func (s *Supervisor) InitContracts(blockNumber int64) error {
 	ctx := context.Background()
 
 	for contract := range s.newContracts {
 		if err := s.explorer.LoadInfo(ctx, &contract); err != nil {
 			return err
 		}
-
-		fmt.Println(contract)
-		s.Lock()
 
 		if s.storage.Initialized(ctx, &contract) {
 			s.usedContracts[contract] = struct{}{}
@@ -42,7 +38,7 @@ func (s *Supervisor) InitContracts() error {
 			return err
 		}
 
-		if err := s.storage.SaveContractForge(ctx, contract.FoundAt(), contractID); err != nil {
+		if err := s.storage.SaveContractForge(ctx, blockNumber, contractID); err != nil {
 			return err
 		}
 
@@ -50,7 +46,6 @@ func (s *Supervisor) InitContracts() error {
 		delete(s.newContracts, contract)
 
 		s.log.Debug("Deployed contract", zap.String("address", contract.Address))
-		s.Unlock()
 	}
 
 	s.log.Info("All new contracts successfully initialized!")

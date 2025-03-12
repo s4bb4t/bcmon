@@ -17,8 +17,9 @@ func (s *Supervisor) Spin() {
 		s.log.Error("failed to get last block", zap.Error(err))
 	}
 
-	blocks, contracts, errCh := s.producer.Produce(blockNumber)
-	done := make(chan struct{})
+	done, handled := make(chan struct{}), make(chan struct{})
+	blocks, contracts, errCh := s.producer.Produce(blockNumber, handled)
+	handled <- struct{}{}
 
 	go func() {
 		for {
@@ -34,7 +35,7 @@ func (s *Supervisor) Spin() {
 				if _, exist := s.newContracts[*contract]; !exist {
 					if _, exist = s.usedContracts[*contract]; !exist {
 						s.newContracts[*contract] = struct{}{}
-						s.log.Debug("contract to initialize:", zap.String("address", contract.Address))
+						s.log.Debug("contract to initialize:", zap.Any("ent", contract))
 					}
 				}
 				s.Unlock()
@@ -48,12 +49,14 @@ func (s *Supervisor) Spin() {
 			case <-done:
 				return
 			case block := <-blocks:
-				if err := s.storage.SaveBlock(context.Background(), block); err != nil {
+				s.Lock()
+				blockID, err := s.storage.SaveBlock(context.Background(), block)
+				if err != nil {
 					errCh <- err
 					continue
 				}
 
-				if err := s.InitContracts(); err != nil {
+				if err := s.InitContracts(blockID); err != nil {
 					errCh <- err
 					continue
 				}
@@ -62,27 +65,10 @@ func (s *Supervisor) Spin() {
 					errCh <- err
 					continue
 				}
+
+				handled <- struct{}{}
+				s.Unlock()
 			}
 		}
 	}()
-
-	//go func() {
-	//	ticker := time.NewTicker(s.delay)
-	//	for {
-	//		select {
-	//		case <-done:
-	//			return
-	//		case <-ticker.C:
-	//			select {
-	//			case <-done:
-	//				return
-	//			default:
-	//				err := s.InitContracts()
-	//				if err != nil {
-	//					s.log.Error("failed to Init contracts", zap.Error(err))
-	//				}
-	//			}
-	//		}
-	//	}
-	//}()
 }

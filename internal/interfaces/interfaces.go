@@ -8,7 +8,7 @@ import (
 
 type (
 	Producer interface {
-		Produce(lastBlockNumber *big.Int) (chan *big.Int, chan *ent.Contract, chan error)
+		Produce(lastBlockNumber *big.Int, handled chan struct{}) (chan *big.Int, chan *ent.Contract, chan error)
 		Stop()
 	}
 
@@ -20,8 +20,8 @@ type (
 	}
 
 	Storage interface {
-		SaveContractForge(ctx context.Context, num *big.Int, contractID int64) error
-		SaveBlock(ctx context.Context, num *big.Int) error
+		SaveContractForge(ctx context.Context, num, contractID int64) error
+		SaveBlock(ctx context.Context, num *big.Int) (int64, error)
 		BlockHandled(ctx context.Context, num *big.Int) error
 
 		LastBlock() (*big.Int, error)

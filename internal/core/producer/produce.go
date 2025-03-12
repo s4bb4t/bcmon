@@ -17,7 +17,7 @@ const (
 	transferBatch  = "0x4a39dc06d4c0dbc64b70af90fd698a233a518a4cb44f16935b4b89f1de659520"
 )
 
-func (p *Producer) Produce(lastBlockNumber *big.Int) (chan *big.Int, chan *entity.Contract, chan error) {
+func (p *Producer) Produce(lastBlockNumber *big.Int, handled chan struct{}) (chan *big.Int, chan *entity.Contract, chan error) {
 	blocks := make(chan *big.Int)
 	contracts := make(chan *entity.Contract)
 	errCh := make(chan error)
@@ -32,14 +32,13 @@ func (p *Producer) Produce(lastBlockNumber *big.Int) (chan *big.Int, chan *entit
 				close(contracts)
 				close(errCh)
 				return
-			default:
+			case <-handled:
 				block, err := p.client.BlockByNumber(context.Background(), blockNumber)
 				if err != nil {
 					errCh <- fmt.Errorf("failed to get block: %w", err)
 					return
 				}
 				p.log.Debug("got new block", zap.Int64("number", block.Number().Int64()))
-				blocks <- block.Number()
 
 				for _, tx := range block.Transactions() {
 					receipt, err := p.client.TransactionReceipt(context.Background(), tx.Hash())
@@ -60,11 +59,12 @@ func (p *Producer) Produce(lastBlockNumber *big.Int) (chan *big.Int, chan *entit
 								ChainID: entity.Atoi[p.network],
 								Address: logEntry.Address.String(),
 							}
-							c.Found(blockNumber)
+							c.Found(block.Number())
 							contracts <- c
 						}
 					}
 				}
+				blocks <- block.Number()
 			}
 			blockNumber.Add(blockNumber, one)
 		}
