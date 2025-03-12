@@ -24,17 +24,15 @@ func (s *Supervisor) InitContracts(blockNumber int64) error {
 			continue
 		}
 
-		/*
-			if err := s.graph.Init(contract.Address); err != nil {
-				return err
-			}
-			if err := s.graph.Create(contract.Address); err != nil {
-				return err
-			}
-			if err := s.graph.Deploy(contract.Address); err != nil {
-				return err
-			}
-		*/
+		if err := s.graph.Init(contract.Address); err != nil {
+			return err
+		}
+		if err := s.graph.Create(contract.Address); err != nil {
+			return err
+		}
+		if err := s.graph.Deploy(contract.Address); err != nil {
+			return err
+		}
 
 		contractID, err := s.storage.SaveContract(ctx, contract)
 		if err != nil {
