@@ -8,6 +8,7 @@ import (
 	"git.web3gate.ru/web3/nft/GraphForge/internal/core/explorer"
 	"git.web3gate.ru/web3/nft/GraphForge/internal/core/graph"
 	"git.web3gate.ru/web3/nft/GraphForge/internal/core/producer"
+	"git.web3gate.ru/web3/nft/GraphForge/internal/entity"
 	"git.web3gate.ru/web3/nft/GraphForge/internal/grpc"
 	"git.web3gate.ru/web3/nft/GraphForge/internal/storage"
 	appcloser "git.web3gate.ru/web3/nft/GraphForge/pkg/app_closer"
@@ -75,7 +76,7 @@ func main() {
 			repo,
 			theGraph,
 			log,
-			network.UpdateDelay,
+			entity.Atoi[network.Name],
 		)
 
 		closer.AddCloser(app.Stop, network.Name)
@@ -85,7 +86,8 @@ func main() {
 
 	detect := explorer.NewTokenDetector(clients, log)
 	theGraph := graph.NewGraph("universal", cfg.GetSubgraphPath(), cfg.GetGraphNodeURL(), log)
-	server := grpc.InitForgeGRPC(log, theGraph, detect)
+	repo := storage.NewStorage(ctx, pgConnector, log)
+	server := grpc.InitForgeGRPC(log, theGraph, detect, repo)
 
 	closer.AddCloser(server.GracefulStop, "grpc")
 

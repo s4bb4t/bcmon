@@ -18,17 +18,11 @@ networks:
   - sepolia:
     upstream_url: "https://b.dev.web3gate.ru:32443/5cb70a38-a49b-452a-ac94-ad5b98d5d482"
     name: "sepolia"
-    update_delay: "60s"
-    request_delay: "500ms"
 
-#  - holesky:
-#    upstream_url: "https://b.dev.web3gate.ru:32443/b0ba9939-7e34-4a4c-a143-df29f6edfa56"
-#    name: "holesky"
-#    update_delay: "60s"
-#    request_delay: "500ms"
+  - holesky:
+    upstream_url: "https://b.dev.web3gate.ru:32443/bcb9ec93-79c9-410a-90d8-2e4f25d72949"
+    name: "holesky"
 
-#  - mainnet:
-#    upstream_url: "https://b.web3gate.ru/eca6db8b-45d9-446c-bafa-5ea9bc5e1ce0"
-#    name: "mainnet"
-#    update_delay: "60s"
-#    request_delay: "1000ms"
+  - mainnet:
+    upstream_url: "https://b.dev.web3gate.ru:32443/eaee189c-eed9-4925-ad83-b422934fdf27"
+    name: "mainnet"

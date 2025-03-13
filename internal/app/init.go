@@ -19,6 +19,11 @@ func (s *Supervisor) InitContracts(blockNumber int64) error {
 			return err
 		}
 
+		contractID, err := s.storage.SaveContract(ctx, contract)
+		if err != nil {
+			return err
+		}
+
 		if s.storage.Initialized(ctx, contract) {
 			s.usedContracts[contract.Address] = struct{}{}
 			continue
@@ -31,11 +36,6 @@ func (s *Supervisor) InitContracts(blockNumber int64) error {
 			return err
 		}
 		if err := s.graph.Deploy(contract.Address); err != nil {
-			return err
-		}
-
-		contractID, err := s.storage.SaveContract(ctx, contract)
-		if err != nil {
 			return err
 		}
 

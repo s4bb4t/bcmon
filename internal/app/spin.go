@@ -13,7 +13,7 @@ import (
 // 3. Periodically initializes contracts in the graph.
 // This function blocks the current goroutine and should be stopped using the Stop() method.
 func (s *Supervisor) Spin() {
-	blockNumber, err := s.storage.LastBlock()
+	blockNumber, err := s.storage.LastBlock(s.chainID)
 	if err != nil {
 		s.log.Error("failed to get last block", zap.Error(err))
 	}
@@ -65,7 +65,7 @@ func (s *Supervisor) Spin() {
 			case <-done:
 				return
 			case block := <-blocks:
-				blockID, err := s.storage.SaveBlock(context.Background(), block)
+				blockID, err := s.storage.SaveBlock(context.Background(), block, s.chainID)
 				if err != nil {
 					errCh <- err
 					continue
@@ -76,7 +76,7 @@ func (s *Supervisor) Spin() {
 					continue
 				}
 
-				if err := s.storage.BlockHandled(context.Background(), block); err != nil {
+				if err := s.storage.BlockHandled(context.Background(), block, s.chainID); err != nil {
 					errCh <- err
 					continue
 				}

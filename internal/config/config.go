@@ -38,8 +38,8 @@ type Network struct {
 	Name        string `mapstructure:"name" json:"name"`
 	UpstreamURL string `mapstructure:"upstream_url" json:"upstream_url"`
 
-	RequestDelay time.Duration `mapstructure:"request_delay" json:"request_delay"`
-	UpdateDelay  time.Duration `mapstructure:"update_delay" json:"update_delay"`
+	//RequestDelay time.Duration `mapstructure:"request_delay" json:"request_delay"`
+	//UpdateDelay  time.Duration `mapstructure:"update_delay" json:"update_delay"`
 }
 
 func (c *Config) GrpcPort() int {
@@ -53,9 +53,9 @@ func (c *Config) GetGraphNodeURL() string {
 	return c.GraphNodeURL
 }
 
-func (c *Network) GetRequestDelay() time.Duration {
-	return c.RequestDelay
-}
+//func (c *Network) GetRequestDelay() time.Duration {
+//	return c.RequestDelay
+//}
 
 func (c *Config) GetSubgraphPath() string {
 	if c.GraphPath == "" {

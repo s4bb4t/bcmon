@@ -7,12 +7,13 @@ import (
 	"google.golang.org/grpc"
 )
 
-func InitForgeGRPC(log *zap.Logger, deployer interfaces.Deployer, detector interfaces.Detector) *grpc.Server {
+func InitForgeGRPC(log *zap.Logger, deployer interfaces.Deployer, detector interfaces.Detector, repo interfaces.Storage) *grpc.Server {
 	s := grpc.NewServer()
 	g.RegisterSubgraphServiceServer(s, &deployerServer{
-		log: log,
-		dep: deployer,
-		dec: detector,
+		log:  log,
+		dep:  deployer,
+		dec:  detector,
+		repo: repo,
 	})
 	return s
 }

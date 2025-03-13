@@ -5,7 +5,6 @@ import (
 	i "git.web3gate.ru/web3/nft/GraphForge/internal/interfaces"
 	"go.uber.org/zap"
 	"sync"
-	"time"
 )
 
 type Supervisor struct {
@@ -15,11 +14,10 @@ type Supervisor struct {
 	graph    i.Graph
 
 	contracts []*ent.Contract
+	chainID   int64
 
 	usedContracts map[string]struct{}
 	newContracts  map[string]struct{}
-
-	delay time.Duration
 
 	log *zap.Logger
 
@@ -35,7 +33,7 @@ func NewSupervisor(
 	storage i.Storage,
 	graph i.Graph,
 	log *zap.Logger,
-	delay time.Duration,
+	chainId int64,
 ) *Supervisor {
 	return &Supervisor{
 		explorer: explorer,
@@ -43,10 +41,10 @@ func NewSupervisor(
 		storage:  storage,
 		graph:    graph,
 
+		chainID: chainId,
+
 		usedContracts: make(map[string]struct{}),
 		newContracts:  make(map[string]struct{}),
-
-		delay: delay,
 
 		log: log,
 	}

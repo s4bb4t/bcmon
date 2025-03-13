@@ -21,10 +21,10 @@ type (
 
 	Storage interface {
 		SaveContractForge(ctx context.Context, num, contractID int64) error
-		SaveBlock(ctx context.Context, num *big.Int) (int64, error)
-		BlockHandled(ctx context.Context, num *big.Int) error
+		SaveBlock(ctx context.Context, num *big.Int, chainID int64) (int64, error)
+		BlockHandled(ctx context.Context, num *big.Int, chainID int64) error
 
-		LastBlock() (*big.Int, error)
+		LastBlock(chainID int64) (*big.Int, error)
 		Initialized(ctx context.Context, contract *ent.Contract) bool
 
 		SaveContract(ctx context.Context, dep *ent.Contract) (contractID int64, err error)
