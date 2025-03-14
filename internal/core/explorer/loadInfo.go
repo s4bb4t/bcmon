@@ -12,6 +12,10 @@ func (e *Explorer) LoadInfo(ctx context.Context, contract *ent.Contract) error {
 		return fmt.Errorf("failed to define type for %s, %s: %w", contract.Network, contract.Address, err)
 	}
 
+	if _type == ent.UnknownType {
+		return fmt.Errorf("unknown type of contract: %s, %s", contract.Network, contract.Address)
+	}
+
 	deployments, err := e.etherscanDeployment(ctx, contract.ChainID, contract.Address)
 	if err != nil {
 		return fmt.Errorf("failed to get deployment for %s, %s: %w", contract.Network, contract.Address, err)

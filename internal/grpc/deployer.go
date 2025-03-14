@@ -42,8 +42,6 @@ func (s *deployerServer) CreateSubgraph(ctx context.Context, params *g.CreateSub
 	//	return nil, fmt.Errorf("failed to create subgraph: %w", err)
 	//}
 
-	fmt.Println(0, contractId)
-
 	if err := s.repo.SaveContractForge(ctx, 0, contractId); err != nil {
 		return nil, fmt.Errorf("failed to save deployment")
 	}

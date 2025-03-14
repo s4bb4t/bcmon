@@ -81,7 +81,7 @@ func main() {
 
 		closer.AddCloser(app.Stop, network.Name)
 
-		go app.Spin()
+		//go app.Spin()
 	}
 
 	detect := explorer.NewTokenDetector(clients, log)
