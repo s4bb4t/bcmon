@@ -32,19 +32,12 @@ func (s *Supervisor) Spin() {
 			case <-done:
 				return
 			case contract := <-contracts:
-
-				// костыль todo: убрать
-				// ---------------------------------------------------------------------
-				_type, err := s.explorer.Type(context.Background(), contract)
-				if err != nil {
-					s.log.Error("failed to get type of contract", zap.Error(err))
+				if contract.Type != ent.ERC1155Type {
+					if !s.explorer.IsERC721(context.Background(), contract) {
+						s.producer.Exception(contract.Address)
+						continue
+					}
 				}
-
-				if _type == ent.ERC20Type {
-					continue
-				}
-				// ---------------------------------------------------------------------
-				//
 
 				s.Lock()
 				if _, exist := s.newContracts[contract.Address]; !exist {

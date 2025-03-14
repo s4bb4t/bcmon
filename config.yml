@@ -16,13 +16,13 @@ grpc_port: 5010
 
 networks:
   - sepolia:
-    upstream_url: "https://b.dev.web3gate.ru:32443/5cb70a38-a49b-452a-ac94-ad5b98d5d482"
+    upstream_url: "https://b.dev.web3gate.ru:32443/045320f8-912e-4a30-a8c3-980c809aeb17"
     name: "sepolia"
 
-  - holesky:
-    upstream_url: "https://b.dev.web3gate.ru:32443/bcb9ec93-79c9-410a-90d8-2e4f25d72949"
-    name: "holesky"
-
-  - mainnet:
-    upstream_url: "https://b.dev.web3gate.ru:32443/eaee189c-eed9-4925-ad83-b422934fdf27"
-    name: "mainnet"
+#  - holesky:
+#    upstream_url: "https://b.dev.web3gate.ru:32443/bcb9ec93-79c9-410a-90d8-2e4f25d72949"
+#    name: "holesky"
+#
+#  - mainnet:
+#    upstream_url: "https://b.dev.web3gate.ru:32443/eaee189c-eed9-4925-ad83-b422934fdf27"
+#    name: "mainnet"

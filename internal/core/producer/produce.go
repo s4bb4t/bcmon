@@ -38,13 +38,14 @@ func (p *Producer) Produce(lastBlockNumber *big.Int, handled chan struct{}) (cha
 					errCh <- fmt.Errorf("failed to get block: %w", err)
 					return
 				}
-				p.log.Debug("got new block", zap.Int64("number", block.Number().Int64()))
+
+				p.log.Debug("new block", zap.Int64("number", block.Number().Int64()))
 
 				for _, tx := range block.Transactions() {
 					receipt, err := p.client.TransactionReceipt(context.Background(), tx.Hash())
 					if err != nil {
 						p.log.Error("failed to get transaction receipt:", zap.Error(err))
-						continue
+						return
 					}
 
 					for _, logEntry := range receipt.Logs {
@@ -53,11 +54,29 @@ func (p *Producer) Produce(lastBlockNumber *big.Int, handled chan struct{}) (cha
 						}
 
 						switch logEntry.Topics[0].Hex() {
-						case transfer, transferSingle, transferBatch:
+						case transferSingle, transferBatch:
+							if p.excepted(logEntry.Address.String()) {
+								continue
+							}
+
 							c := &entity.Contract{
 								Network: p.network,
 								ChainID: entity.Atoi[p.network],
 								Address: logEntry.Address.String(),
+								Type:    entity.ERC1155Type,
+							}
+							c.Found(block.Number())
+							contracts <- c
+						case transfer:
+							if p.excepted(logEntry.Address.String()) {
+								continue
+							}
+
+							c := &entity.Contract{
+								Network: p.network,
+								ChainID: entity.Atoi[p.network],
+								Address: logEntry.Address.String(),
+								Type:    entity.ERC721Type,
 							}
 							c.Found(block.Number())
 							contracts <- c

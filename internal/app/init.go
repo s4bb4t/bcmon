@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	ent "git.web3gate.ru/web3/nft/GraphForge/internal/entity"
 	"go.uber.org/zap"
 )
@@ -16,6 +17,12 @@ func (s *Supervisor) InitContracts(blockNumber int64) error {
 
 	for _, contract := range s.contracts {
 		if err := s.explorer.LoadInfo(ctx, contract); err != nil {
+			if errors.Is(err, ent.ErrNOTOK) {
+				s.producer.Exception(contract.Address)
+				s.log.Debug("skipped due to spam", zap.String("addr", contract.Address))
+				continue
+			}
+
 			return err
 		}
 
@@ -29,15 +36,15 @@ func (s *Supervisor) InitContracts(blockNumber int64) error {
 			continue
 		}
 
-		if err := s.graph.Init(contract.Address); err != nil {
-			return err
-		}
-		if err := s.graph.Create(contract.Address); err != nil {
-			return err
-		}
-		if err := s.graph.Deploy(contract.Address); err != nil {
-			return err
-		}
+		//if err := s.graph.Init(contract.Address); err != nil {
+		//	return err
+		//}
+		//if err := s.graph.Create(contract.Address); err != nil {
+		//	return err
+		//}
+		//if err := s.graph.Deploy(contract.Address); err != nil {
+		//	return err
+		//}
 
 		if err := s.storage.SaveContractForge(ctx, blockNumber, contractID); err != nil {
 			return err

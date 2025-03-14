@@ -10,6 +10,7 @@ type (
 	Producer interface {
 		Produce(lastBlockNumber *big.Int, handled chan struct{}) (chan *big.Int, chan *ent.Contract, chan error)
 		Stop()
+		Exception(contract string)
 	}
 
 	Graph interface {
@@ -35,7 +36,8 @@ type (
 	}
 
 	Detector interface {
-		Type(ctx context.Context, deployment *ent.Contract) (string, error)
+		IsERC721(ctx context.Context, contract *ent.Contract) bool
+		Type(ctx context.Context, contract *ent.Contract) (string, error)
 		LoadInfo(ctx context.Context, contract *ent.Contract) error
 	}
 )

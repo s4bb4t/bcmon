@@ -52,8 +52,7 @@ func (e *Explorer) etherscanDeploymentBatch(ctx context.Context, chainID int64, 
 	}
 
 	if len(response.Result) == 0 {
-		e.log.Debug("No deployment transaction found")
-		return &[]ent.Deployment{}, fmt.Errorf("%s: %w", op)
+		return nil, fmt.Errorf("%s: %w", op, ent.ErrNOTOK)
 	}
 
 	return &response.Result, nil
@@ -89,6 +88,10 @@ func (e *Explorer) etherscanDeployment(ctx context.Context, chainID int64, contr
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
+	if len(response.Result) == 0 {
+		return nil, fmt.Errorf("%s: %w", op, ent.ErrNOTOK)
+	}
+
 	unix, err := strconv.Atoi(response.Result[0].TimeUnix)
 	if err != nil {
 		e.log.Error("Error decoding Atoi", zap.Error(err))
@@ -98,7 +101,7 @@ func (e *Explorer) etherscanDeployment(ctx context.Context, chainID int64, contr
 
 	if len(response.Result) == 0 {
 		e.log.Debug("No deployment transaction found")
-		return nil, fmt.Errorf("%s: %w", op)
+		return nil, fmt.Errorf("%s: %s", op, "No deployment transaction found")
 	}
 
 	return &response.Result[0], nil

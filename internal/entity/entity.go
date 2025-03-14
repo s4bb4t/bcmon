@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"fmt"
 	"math/big"
 	"time"
 )
@@ -52,16 +53,16 @@ const (
 	SEPOLIA int64 = 11155111
 	HOLESKY int64 = 17000
 
-	ETH_MAINNET_ADDRES = "https://api.etherscan.io/api"
-	ETH_SEPOLIA_ADDRES = "https://api-sepolia.etherscan.io/api"
-	ETH_HOLESKY_ADDRES = "https://api-holesky.etherscan.io/api"
+	ETH_MAINNET_ADDRESS = "https://api.etherscan.io/api"
+	ETH_SEPOLIA_ADDRESS = "https://api-sepolia.etherscan.io/api"
+	ETH_HOLESKY_ADDRESS = "https://api-holesky.etherscan.io/api"
 )
 
 var (
 	EtherScanKeys = map[int64]string{
-		MAINNET: ETH_MAINNET_ADDRES,
-		SEPOLIA: ETH_SEPOLIA_ADDRES,
-		HOLESKY: ETH_HOLESKY_ADDRES,
+		MAINNET: ETH_SEPOLIA_ADDRESS,
+		SEPOLIA: ETH_SEPOLIA_ADDRESS,
+		HOLESKY: ETH_HOLESKY_ADDRESS,
 	}
 
 	Atoi = map[string]int64{
@@ -75,6 +76,8 @@ var (
 		SEPOLIA: "sepolia",
 		HOLESKY: "holesky",
 	}
+
+	ErrNOTOK = fmt.Errorf("No data found")
 )
 
 func (c *Contract) FoundAt() *big.Int {

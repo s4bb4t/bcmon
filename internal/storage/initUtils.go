@@ -13,7 +13,7 @@ func (s *storage) LastBlock(chainID int64) (*big.Int, error) {
 	const op = "storage.LastBlock"
 
 	var blockNum int64
-	if err := s.db.QueryRowContext(context.Background(), `select block_number from nft.forge_block where is_handled = true and chain_id = $1 order by date desc limit 1`, chainID).Scan(&blockNum); err != nil {
+	if err := s.db.QueryRowContext(context.Background(), `select block_number from nft.forge_block where is_handled = true and chain_id = $1 order by id desc limit 1`, chainID).Scan(&blockNum); err != nil {
 		return nil, fmt.Errorf("%s: failed to insert: %w", op, err)
 	}
 

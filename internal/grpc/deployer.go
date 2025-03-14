@@ -38,9 +38,9 @@ func (s *deployerServer) CreateSubgraph(ctx context.Context, params *g.CreateSub
 		return nil, fmt.Errorf("failed to save contract")
 	}
 
-	if err := s.dep.CreateSubgraph(ctx, contract); err != nil {
-		return nil, fmt.Errorf("failed to create subgraph: %w", err)
-	}
+	//if err := s.dep.CreateSubgraph(ctx, contract); err != nil {
+	//	return nil, fmt.Errorf("failed to create subgraph: %w", err)
+	//}
 
 	fmt.Println(0, contractId)
 

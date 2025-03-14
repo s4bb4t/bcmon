@@ -25,7 +25,7 @@ func (s *storage) SaveBlock(ctx context.Context, num *big.Int, chainID int64) (i
 	var blockID int64
 	if err := s.db.QueryRowContext(ctx, `select id from nft.forge_block where block_number = $1 and chain_id = $2`, num.Int64(), chainID).Scan(&blockID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			if err := s.db.QueryRowContext(ctx, `INSERT INTO nft.forge_block (block_number) values($1) returning id`, num.Int64()).Scan(&blockID); err != nil {
+			if err := s.db.QueryRowContext(ctx, `INSERT INTO nft.forge_block (block_number, chain_id) values($1, $2) returning id`, num.Int64(), chainID).Scan(&blockID); err != nil {
 				return 0, fmt.Errorf("%s: failed to insert: %w", op, err)
 			}
 			return blockID, nil
