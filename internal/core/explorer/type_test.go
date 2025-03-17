@@ -61,13 +61,39 @@ func TestExplorer_Type(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "erc1155",
+			name: "erc1155-1",
 			args: args{
 				ctx: context.Background(),
 				deployment: &ent.Contract{
 					Network: upstream.net,
 					ChainID: 11155111,
 					Address: "0x0E9b80778d0E4c9D701E55C07a2c0F154263bB19",
+				},
+			},
+			want:    ent.ERC1155Type,
+			wantErr: false,
+		},
+		{
+			name: "erc1155-2",
+			args: args{
+				ctx: context.Background(),
+				deployment: &ent.Contract{
+					Network: upstream.net,
+					ChainID: 11155111,
+					Address: "0x26ddE3091C5B372eDe000ECfe4eB91dc3D80C32C",
+				},
+			},
+			want:    ent.ERC1155Type,
+			wantErr: false,
+		},
+		{
+			name: "erc1155-3",
+			args: args{
+				ctx: context.Background(),
+				deployment: &ent.Contract{
+					Network: upstream.net,
+					ChainID: 11155111,
+					Address: "0x6df08BFB7f0B9C40CA36A96c477ec7114825B9eb",
 				},
 			},
 			want:    ent.ERC1155Type,

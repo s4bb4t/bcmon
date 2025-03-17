@@ -48,7 +48,7 @@ func (e *Explorer) isERC721(ctx context.Context, network string, contractAddress
 }
 
 func (e *Explorer) isERC1155(ctx context.Context, network string, contractAddress common.Address) bool {
-	ctx, cancel := context.WithTimeout(ctx, time.Second*15)
+	ctx, cancel := context.WithTimeout(ctx, time.Second*20)
 	defer cancel()
 
 	//interfaceID := [4]byte{0xd9, 0xb6, 0x7a, 0x26}
@@ -66,6 +66,8 @@ func (e *Explorer) isERC1155(ctx context.Context, network string, contractAddres
 
 	block, err := e.clients[network].BlockNumber(ctx)
 	if err != nil {
+		fmt.Println(err)
+
 		e.log.Warn("failed to get last block", zap.Error(err))
 		return false
 	}
@@ -76,15 +78,12 @@ func (e *Explorer) isERC1155(ctx context.Context, network string, contractAddres
 	q := ethereum.FilterQuery{
 		Addresses: []common.Address{contractAddress},
 		Topics:    [][]common.Hash{{transferSingleTopic, transferBatchTopic}},
-		FromBlock: new(big.Int).SetUint64(block - 50000),
+		FromBlock: new(big.Int).SetUint64(block - 50_000),
 		ToBlock:   new(big.Int).SetUint64(block),
 	}
-	fmt.Println(block, "-", block-50000)
 
 	logs, err := e.clients[network].FilterLogs(ctx, q)
-	fmt.Println(len(logs))
 	if err != nil {
-		fmt.Println(err)
 		e.log.Warn("failed to get logs", zap.Error(err))
 		return false
 	}
